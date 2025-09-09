@@ -1,20 +1,36 @@
 "use client";
-import { auth } from "@/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
     try {
-      const userCred = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Signed in:", userCred.user);
-    } catch (err) {
-      console.error(err);
+      const userCred = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCred.user;
+      console.log(user);
+
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        name: username,
+        createdAt: serverTimestamp(),
+      });
+
+      console.log("User signed up and Firestore profile created:", user.uid);
+    } catch (error) {
+      console.error(error);
     }
   };
+
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center bg-[#ffffff13] p-10 rounded-lg">
@@ -29,6 +45,15 @@ export default function LoginPage() {
           className="bg-[#ffffff1d] px-2 py-1 rounded-sm"
         />
         <input
+          type="username"
+          name="username"
+          id="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username"
+          className="bg-[#ffffff1d] px-2 py-1 rounded-sm"
+        />
+        <input
           type="password"
           name="password"
           id="password"
@@ -39,11 +64,11 @@ export default function LoginPage() {
         />
         <button
           className="bg-[#ffffff1d] w-full rounded-sm py-1 hover:bg-[#0000002a] cursor-pointer"
-          onClick={handleLogin}
+          onClick={handleSignup}
         >
-          Login
+          Sign up
         </button>
-        <a href="/signup">Not a member?</a>
+        <a href="/">Already a member?</a>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
