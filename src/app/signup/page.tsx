@@ -17,7 +17,6 @@ export default function SignupPage() {
         password
       );
       const user = userCred.user;
-      console.log(user);
 
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,

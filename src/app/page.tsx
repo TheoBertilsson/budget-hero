@@ -11,6 +11,7 @@ export default function LoginPage() {
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       console.log("Signed in:", userCred.user);
+      if (!userCred) return;
     } catch (err) {
       console.error(err);
     }
