@@ -7,11 +7,22 @@ import {
 import { useEffect, useState } from "react";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "@/components/ui/input";
 
 export default function SignupPage() {
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -21,7 +32,14 @@ export default function SignupPage() {
     return () => unsubscribe();
   }, [router]);
 
-  const handleSignup = async () => {
+  async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    const username = formData.get("username");
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    setLoading(true);
     try {
       const userCred = await createUserWithEmailAndPassword(
         auth,
@@ -38,55 +56,67 @@ export default function SignupPage() {
       useRouter().push("/dashboard");
     } catch (error) {
       console.error(error);
+      setLoading(false);
     }
-  };
+  }
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-[url(../static/budgetHero.png)] bg-cover">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center bg-background  p-10 rounded-lg">
-        <h1 className="text-text-primary text-2xl font-bold">Budget Hero</h1>
+      <main className="flex flex-col gap-[32px] row-start-2 items-center w-full">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Budget Hero</CardTitle>
+            <CardDescription>Sign up to start your adventure</CardDescription>
+            <CardAction>
+              <Button variant={"link"}>
+                <Link href="/"> Log in</Link>
+              </Button>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSignup} id="signupForm">
+              <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input id="username" name="username" type="text" required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    name="email"
+                    placeholder="m@example.com"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
 
-        <>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="bg-foreground/20 text-text-primary px-2 py-1 rounded-sm"
-          />
-          <input
-            type="username"
-            name="username"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
-            className="bg-foreground/20 text-text-primary px-2 py-1 rounded-sm"
-          />
-          <input
-            type="password"
-            name="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="bg-foreground/20 text-text-primary px-2 py-1 rounded-sm"
-          />
-          <button
-            className="bg-victory-green text-text-secondary font-semibold w-full rounded-sm p-1 text-lg hover:bg-victory-green/80 active:bg-victory-green/75 cursor-pointer"
-            onClick={handleSignup}
-          >
-            Sign up
-          </button>
-          <a
-            href="/"
-            className="hover:underline hover:underline-offset-4 cursor-pointer"
-          >
-            Already a member?
-          </a>
-        </>
+                  <Input
+                    id="password"
+                    type="password"
+                    name="password"
+                    required
+                  />
+                </div>
+              </div>
+            </form>
+          </CardContent>
+          <CardFooter className="flex-col gap-2">
+            <Button
+              form="signupForm"
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? "Please wait..." : "Sign up"}
+            </Button>
+            <Button variant="outline" className="w-full">
+              Sign up with Google
+            </Button>
+          </CardFooter>
+        </Card>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a

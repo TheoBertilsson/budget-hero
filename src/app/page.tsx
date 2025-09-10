@@ -1,12 +1,23 @@
 "use client";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@radix-ui/react-label";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -16,56 +27,86 @@ export default function LoginPage() {
     return () => unsubscribe();
   }, [router]);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       if (!userCred) return;
       router.push("/dashboard");
     } catch (err) {
       console.error(err);
+      setLoading(false);
     }
   };
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-[url(../static/budgetHero.png)] bg-cover bg-foreground">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center bg-background  p-10 rounded-lg">
-        <h1 className="text-text-primary text-2xl font-bold">Budget Hero</h1>
-
-        <>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="bg-foreground/20 text-text-primary px-2 py-1 rounded-sm"
-          />
-          <input
-            type="password"
-            name="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="bg-foreground/20 text-text-primary px-2 py-1 rounded-sm"
-          />
-          <button
-            className="bg-[#10B981] text-text-secondary font-semibold w-full rounded-sm p-1 text-lg hover:bg-victory-green/80 active:bg-victory-green/75 cursor-pointer"
-            onClick={handleLogin}
-          >
-            Login
-          </button>
-          <a
-            href="/signup"
-            className="hover:underline hover:underline-offset-4 cursor-pointer"
-          >
-            Not a member?
-          </a>
-        </>
+      <main className="flex flex-col gap-[32px] row-start-2 items-center w-full">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Budget Hero</CardTitle>
+            <CardAction>
+              <Button variant={"link"}>
+                <Link href="/signup"> Sign up</Link>
+              </Button>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            <form id="loginForm" onSubmit={handleLogin}>
+              <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    name="email"
+                    placeholder="m@example.com"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center">
+                    <Label htmlFor="password">Password</Label>
+                    <a
+                      href="#"
+                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    >
+                      Forgot your password?
+                    </a>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    name="password"
+                    required
+                  />
+                </div>
+              </div>
+            </form>
+          </CardContent>
+          <CardFooter className="flex-col gap-2">
+            <Button
+              type="submit"
+              form="loginForm"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? "Please wait..." : "Login"}
+            </Button>
+            <Button variant="outline" className="w-full">
+              Login with Google
+            </Button>
+          </CardFooter>
+        </Card>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4 text-text-secondary"
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4 text-text-secondary text-sm"
           href=""
           target="_blank"
         >
