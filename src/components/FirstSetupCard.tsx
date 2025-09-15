@@ -14,7 +14,6 @@ import { useDate } from "@/lib/stores/DateContext";
 
 export default function FirstSetupCard() {
   const { loading, setFinance } = useFinance();
-  const { year, month } = useDate();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

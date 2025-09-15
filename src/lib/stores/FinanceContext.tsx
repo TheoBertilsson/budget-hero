@@ -24,8 +24,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const { year, month } = useDate();
 
   useEffect(() => {
-    console.log("fisk");
-
     const fetchFinance = async () => {
       const user = auth.currentUser;
       if (!user) {
