@@ -1,11 +1,30 @@
-export type Finance = {
+export type MonthlyFinance = {
   income: number;
-  savings: number;
-  variedIncome: boolean;
+  savingsGoal: number;
+  expenses: Expense[] | null;
+};
+
+export type Expense = {
+  item: string;
+  cost: number;
+  category: string;
+};
+
+export type FinanceData = {
+  [year: string]: {
+    [month: string]: MonthlyFinance | null;
+  };
 };
 
 export type FinanceContextType = {
-  finance: Finance | null;
+  finance: MonthlyFinance | null;
   loading: boolean;
-  setFinance: (data: Finance) => Promise<void>;
+  setFinance: (data: MonthlyFinance) => Promise<void>;
+};
+
+export type DateContextType = {
+  year: string;
+  month: string;
+  setYear: (year: string) => void;
+  setMonth: (month: string) => void;
 };
