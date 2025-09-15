@@ -9,29 +9,33 @@ import {
 import { Label } from "@radix-ui/react-label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Checkbox } from "./ui/checkbox";
 import { useFinance } from "@/lib/stores/FinanceContext";
+import { useDate } from "@/lib/stores/DateContext";
 
 export default function FirstSetupCard() {
-  const { finance, loading, setFinance } = useFinance();
+  const { loading, setFinance } = useFinance();
+  const { year, month } = useDate();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const income = formData.get("income")
-      ? Number(formData.get("income"))
+    const monthlyIncome = formData.get("monthlyIncome")
+      ? Number(formData.get("monthlyIncome"))
       : null;
-    const savings = formData.get("savings")
-      ? Number(formData.get("savings"))
+    const monthlySavingsGoal = formData.get("monthlySavingsGoal")
+      ? Number(formData.get("monthlySavingsGoal"))
       : null;
-    const variedIncome = formData.get("variedIncome") === "on";
+    const savingsGoal = formData.get("savingsGoal")
+      ? Number(formData.get("savingsGoal"))
+      : null;
 
-    if (!income || !savings) throw new Error("Invalid Data");
+    if (!monthlyIncome || !monthlySavingsGoal || !savingsGoal)
+      throw new Error("Invalid Data");
     try {
       setFinance({
-        income,
-        savings,
-        variedIncome,
+        income: monthlyIncome,
+        savingsGoal: monthlySavingsGoal,
+        expenses: null,
       });
     } catch (error) {
       return;
@@ -53,36 +57,37 @@ export default function FirstSetupCard() {
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <div className="flex gap-2 justify-between">
-                  <Label htmlFor="income">Income</Label>
-                  <div className="flex gap-2 items-center">
-                    <Label htmlFor="variedIncome" className="underline text-sm">
-                      Income varies monthly
-                    </Label>
-                    <Checkbox
-                      id="variedIncome"
-                      className="border border-primary"
-                      name="variedIncome"
-                    />
-                  </div>
+                  <Label htmlFor="income">Monthly Income</Label>
                 </div>
 
                 <Input
-                  id="income"
+                  id="monthlyIncome"
                   type="number"
-                  name="income"
+                  name="monthlyIncome"
                   placeholder="25000 / month"
                   min={0}
                   required
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="savings">Savings</Label>
+                <Label htmlFor="monthlySavingsGoal">Monthly Savings</Label>
                 <Input
-                  id="savings"
+                  id="monthlySavingsGoal"
                   type="number"
                   min={0}
-                  name="savings"
+                  name="monthlySavingsGoal"
                   placeholder="5000 / month"
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="savingsGoal">Savings Goal</Label>
+                <Input
+                  id="savingsGoal"
+                  type="number"
+                  min={0}
+                  name="savingsGoal"
+                  placeholder="1 000 000"
                   required
                 />
               </div>

@@ -1,8 +1,15 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
-import { Finance, FinanceContextType } from "../types";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { FinanceContextType, MonthlyFinance } from "../types";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { useDate } from "./DateContext";
 
 const FinanceContext = createContext<FinanceContextType>({
   finance: null,
@@ -10,11 +17,15 @@ const FinanceContext = createContext<FinanceContextType>({
   setFinance: async () => {},
 });
 
-export function FinanceProvider({ children }: { children: React.ReactNode }) {
-  const [finance, setFinanceState] = useState<Finance | null>(null);
+export function FinanceProvider({ children }: { children: ReactNode }) {
+  const [finance, setFinanceState] = useState<MonthlyFinance | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const { year, month } = useDate();
+
   useEffect(() => {
+    console.log("fisk");
+
     const fetchFinance = async () => {
       const user = auth.currentUser;
       if (!user) {
@@ -23,23 +34,35 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const financeRef = doc(db, "users", user.uid, "settings", "finance");
+      const financeRef = doc(
+        db,
+        "users",
+        user.uid,
+        "finance",
+        `${year}-${month}`
+      );
       const snap = await getDoc(financeRef);
 
       if (snap.exists()) {
-        setFinanceState(snap.data() as Finance);
+        setFinanceState(snap.data() as MonthlyFinance);
       }
       setLoading(false);
     };
 
     fetchFinance();
-  }, []);
+  }, [year, month]);
 
-  const setFinance = async (data: Finance) => {
+  const setFinance = async (data: MonthlyFinance) => {
     const user = auth.currentUser;
     if (!user) throw new Error("No user signed in");
 
-    const financeRef = doc(db, "users", user.uid, "settings", "finance");
+    const financeRef = doc(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      `${year}-${month}`
+    );
     await setDoc(financeRef, data, { merge: true });
 
     setFinanceState(data);
