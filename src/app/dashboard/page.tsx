@@ -6,7 +6,6 @@ import { BudgetCard } from "@/components/Dashboard";
 
 function DashboardContent() {
   const { finance } = useFinance();
-  console.log(finance?.income);
 
   return (
     <main className="w-screen h-screen flex items-center justify-center">
