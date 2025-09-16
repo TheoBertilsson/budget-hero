@@ -36,7 +36,7 @@ export function BudgetCard() {
     finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
   return (
     <>
-      <Card className="w-full max-w-sm h-full">
+      <Card className="w-full h-full">
         <CardContent className="flex flex-col gap-2 ">
           <p>💰 Income: {income.toLocaleString()}</p>
           <p>💸 Expenses: {expenses.toLocaleString()}</p>
@@ -50,7 +50,7 @@ export function BudgetCard() {
   );
 }
 
-export function SavingProgression() {
+export function MonthlySavingProgress() {
   const { savingsGoal, monthlySavingsGoal, totalSavings } = useSavingsGoal();
   const { finance } = useFinance();
   const expenses = finance?.expenses;
@@ -69,24 +69,63 @@ export function SavingProgression() {
 
   return (
     <>
-      <Card className="w-full max-w-sm h-full my-auto">
+      <Card className="w-full h-full my-auto">
         <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
-          <Label className="text-sm " htmlFor="totalProgress">
-            Total:
-          </Label>
-          <Progress
-            value={totalProgress}
-            className="w-3/4 mx-auto"
-            id="totalProgress"
-          />
-          <Label className="text-sm" htmlFor="monthlyProgress">
-            This month:
-          </Label>
+          <div className="flex justify-between">
+            <p>0 SEK</p>
+            <p>{monthlySavingsGoal?.toLocaleString()} SEK</p>
+          </div>
           <Progress
             value={monthlyProgress}
-            className="w-3/4 mx-auto"
+            className="w-full mx-auto h-4"
             id="monthlyProgress"
           />
+          <p className="text-sm leading-6">
+            This month you have saved{" "}
+            <span className="font-bold">
+              {thisMonthSavings?.toLocaleString() || 0}
+            </span>{" "}
+            SEK!
+            <br /> That is <span className="font-bold">
+              {monthlyProgress}%
+            </span>{" "}
+            of your monthly goal!
+          </p>
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
+export function TotalSavingsGoal() {
+  const { savingsGoal, totalSavings } = useSavingsGoal();
+
+  const totalProgress = savingsGoal ? (totalSavings / savingsGoal) * 100 : 0;
+
+  return (
+    <>
+      <Card className="w-full h-full my-auto">
+        <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
+          <div className="flex justify-between">
+            <p>0 SEK</p>
+            <p>{savingsGoal?.toLocaleString()} SEK</p>
+          </div>
+          <Progress
+            value={totalProgress}
+            className="w-full mx-auto h-4"
+            id="monthlyProgress"
+          />
+          <p className="text-sm leading-6">
+            You have saved a total of{" "}
+            <span className="font-bold">
+              {totalSavings?.toLocaleString() || 0}
+            </span>{" "}
+            SEK!
+            <br /> That is <span className="font-bold">
+              {totalProgress}%
+            </span>{" "}
+            of your goal!
+          </p>
         </CardContent>
       </Card>
     </>
