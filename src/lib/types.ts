@@ -1,6 +1,5 @@
 export type MonthlyFinance = {
-  income: number;
-  savingsGoal: number;
+  income: number | null;
   expenses: Expense[] | null;
 };
 
@@ -27,4 +26,16 @@ export type DateContextType = {
   month: string;
   setYear: (year: string) => void;
   setMonth: (month: string) => void;
+};
+export type SavingsGoalContextType = {
+  savingsGoal: number | null;
+  monthlySavingsGoal: number | null;
+  setSavingsGoal: (goal: number) => void;
+  setMonthlySavingsGoal: (goal: number) => void;
+  loading: boolean;
+};
+export type SavingsGoalType = {
+  savingsGoal: number | null;
+  monthlySavingsGoal: number | null;
+  loading: boolean;
 };
