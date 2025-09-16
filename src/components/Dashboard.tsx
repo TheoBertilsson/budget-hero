@@ -33,7 +33,8 @@ import { auth } from "@/lib/firebase";
 
 export function SummaryCard() {
   const { finance } = useFinance();
-  const income = finance?.income || 0;
+  const income =
+    finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
   const expenses =
     finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
   return (
@@ -52,7 +53,8 @@ export function SummaryCard() {
 
 export function BudgetCard() {
   const { finance } = useFinance();
-  const income = finance?.income || 0;
+  const income =
+    finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
   const expenses =
     finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
   return (
@@ -63,7 +65,7 @@ export function BudgetCard() {
           <p>💸 Expenses: {expenses.toLocaleString()}</p>
         </CardContent>
         <CardFooter className="flex justify-between items-center">
-          <Button variant={"ghost"}>Edit</Button>
+          <AddIncomeDrawer />
           <AddExpenseDrawer />
         </CardFooter>
       </Card>
@@ -179,7 +181,7 @@ export function AddExpenseDrawer() {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button>Add Expense</Button>
+        <Button variant={"destructive"}>Add Expense</Button>
       </DrawerTrigger>
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
@@ -250,6 +252,96 @@ export function AddExpenseDrawer() {
   );
 }
 
+function AddIncomeDrawer() {
+  const { addIncome } = useFinance();
+  const [price, setPrice] = useState(0);
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setLoading(true);
+
+    await addIncome({ item: name, cost: price });
+
+    setLoading(false);
+
+    setPrice(0);
+    setName("");
+
+    setOpen(false);
+  }
+  return (
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
+        <Button className="bg-green-500 hover:bg-green-500/90 font-bold">
+          Add Income
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="mx-auto w-full max-w-sm">
+          <DrawerHeader>
+            <DrawerTitle>Add Income</DrawerTitle>
+            <DrawerDescription>Add an income for this month</DrawerDescription>
+          </DrawerHeader>
+          <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="flex flex-col gap-2">
+                <div className="flex-1 text-center">
+                  <Label
+                    className="text-muted-foreground text-[0.70rem] uppercase"
+                    htmlFor="incomePrice"
+                  >
+                    SEK
+                  </Label>
+                  <Input
+                    className="text-7xl font-bold tracking-tighter"
+                    placeholder="0"
+                    type="number"
+                    min={1}
+                    value={price || ""}
+                    onChange={(e) => setPrice(Number(e.currentTarget.value))}
+                    required
+                    name="incomePrice"
+                  />
+                </div>
+                <div className="flex-1 text-center">
+                  <Label
+                    className="text-muted-foreground text-[0.70rem] uppercase"
+                    htmlFor="incomeName"
+                  >
+                    Name
+                  </Label>
+                  <Input
+                    className="text-7xl font-bold tracking-tighter"
+                    type="text"
+                    required
+                    value={name || ""}
+                    onChange={(e) => setName(e.currentTarget.value)}
+                    placeholder="Salary"
+                    name="incomeName"
+                  />
+                </div>
+              </div>
+            </div>
+          </form>
+          <DrawerFooter>
+            <Button type="submit" form="expenseForm" disabled={loading}>
+              {loading ? "Please wait..." : "Add"}
+            </Button>
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
 const categories = [
   {
     value: "housing",

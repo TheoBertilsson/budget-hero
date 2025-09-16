@@ -1,5 +1,5 @@
 export type MonthlyFinance = {
-  income: number | null;
+  incomes: Income[] | null;
   expenses: Expense[] | null;
 };
 
@@ -7,6 +7,10 @@ export type Expense = {
   item: string;
   cost: number;
   category: string;
+};
+export type Income = {
+  item: string;
+  cost: number;
 };
 
 export type FinanceData = {
@@ -20,6 +24,7 @@ export type FinanceContextType = {
   loading: boolean;
   setFinance: (data: MonthlyFinance) => Promise<void>;
   addExpense: (expense: Expense) => Promise<void>;
+  addIncome: (income: Income) => Promise<void>;
 };
 
 export type DateContextType = {

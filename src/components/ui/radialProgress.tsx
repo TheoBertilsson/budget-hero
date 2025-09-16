@@ -39,7 +39,7 @@ export function ChartRadialStacked({
         endAngle={180}
         innerRadius={160}
         outerRadius={260}
-        cy={"90%"}
+        cy={"100%"}
       >
         <ChartTooltip
           cursor={false}

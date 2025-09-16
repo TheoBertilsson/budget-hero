@@ -6,7 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Expense, FinanceContextType, MonthlyFinance } from "../types";
+import { Expense, FinanceContextType, Income, MonthlyFinance } from "../types";
 import { auth, db } from "../firebase";
 import { arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
 import { useDate } from "./DateContext";
@@ -16,6 +16,7 @@ const FinanceContext = createContext<FinanceContextType>({
   loading: true,
   setFinance: async () => {},
   addExpense: async () => {},
+  addIncome: async () => {},
 });
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
@@ -92,14 +93,41 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             expenses: prev.expenses ? [...prev.expenses, expense] : [expense],
           }
         : {
-            income: null,
+            incomes: null,
             expenses: [expense],
+          }
+    );
+  };
+
+  const addIncome = async (income: Income) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user signed in");
+
+    const financeRef = doc(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      `${year}-${month}`
+    );
+
+    await setDoc(financeRef, { incomes: arrayUnion(income) }, { merge: true });
+
+    setFinanceState((prev) =>
+      prev
+        ? {
+            ...prev,
+            incomes: prev.incomes ? [...prev.incomes, income] : [income],
+          }
+        : {
+            incomes: [income],
+            expenses: null,
           }
     );
   };
   return (
     <FinanceContext.Provider
-      value={{ finance, loading, setFinance, addExpense }}
+      value={{ finance, loading, setFinance, addExpense, addIncome }}
     >
       {children}
     </FinanceContext.Provider>
