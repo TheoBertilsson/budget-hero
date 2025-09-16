@@ -14,7 +14,8 @@ import { Slider } from "./ui/slider";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoalContext";
 
 export default function FirstSetupCard() {
-  const { setSavingsGoal, setMonthlySavingsGoal, loading } = useSavingsGoal();
+  const { setSavingsGoal, setMonthlySavingsGoal, setTotalSavings, loading } =
+    useSavingsGoal();
   const [yearsOfSaving, setYearsOfSaving] = useState(3);
   const [savingsGoalState, setSavingsGoalState] = useState(0);
   const monthlySavingsGoal = Math.ceil(savingsGoalState / (yearsOfSaving * 12));
@@ -26,6 +27,7 @@ export default function FirstSetupCard() {
     try {
       setSavingsGoal(savingsGoalState);
       setMonthlySavingsGoal(Number(monthlySavingsGoal));
+      setTotalSavings(0);
     } catch (error) {
       return;
     }

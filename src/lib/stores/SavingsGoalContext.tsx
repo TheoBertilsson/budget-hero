@@ -20,6 +20,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
   const [monthlySavingsGoal, setMonthlySavingsGoalState] = useState<
     number | null
   >(null);
+  const [totalSavings, setTotalSavingsState] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
         const data = snap.data();
         setSavingsGoalState(data.savingsGoal ?? null);
         setMonthlySavingsGoalState(data.monthlySavingsGoal ?? null);
+        setTotalSavings(data.totalSavings ?? 0);
       }
       setLoading(false);
     };
@@ -65,12 +67,23 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
     setMonthlySavingsGoalState(goal);
   };
+  const setTotalSavings = async (price: number) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user signed in");
+
+    const savingGoalRef = doc(db, "users", user.uid, "finance", "savings");
+    await setDoc(savingGoalRef, { totalSavings: price }, { merge: true });
+
+    setMonthlySavingsGoalState(price);
+  };
 
   const value: SavingsGoalContextType = {
     savingsGoal,
     monthlySavingsGoal,
+    totalSavings,
     setSavingsGoal,
     setMonthlySavingsGoal,
+    setTotalSavings,
     loading,
   };
 

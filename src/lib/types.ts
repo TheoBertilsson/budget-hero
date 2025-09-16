@@ -30,8 +30,10 @@ export type DateContextType = {
 export type SavingsGoalContextType = {
   savingsGoal: number | null;
   monthlySavingsGoal: number | null;
+  totalSavings: number;
   setSavingsGoal: (goal: number) => void;
   setMonthlySavingsGoal: (goal: number) => void;
+  setTotalSavings: (price: number) => void;
   loading: boolean;
 };
 export type SavingsGoalType = {
