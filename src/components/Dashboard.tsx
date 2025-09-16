@@ -28,6 +28,26 @@ import {
 } from "./ui/command";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoalContext";
 import { Progress } from "./ui/progress";
+import { ChartRadialStacked } from "./ui/radialProgress";
+
+export function SummaryCard() {
+  const { finance } = useFinance();
+  const income = finance?.income || 0;
+  const expenses =
+    finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+  return (
+    <>
+      <Card className="w-full h-full">
+        <CardContent className="flex flex-col gap-2 w-full h-full ">
+          <div className="flex items-center justify-center">
+            <ChartRadialStacked expenses={expenses} income={income} />
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between items-center"></CardFooter>
+      </Card>
+    </>
+  );
+}
 
 export function BudgetCard() {
   const { finance } = useFinance();
@@ -51,7 +71,7 @@ export function BudgetCard() {
 }
 
 export function MonthlySavingProgress() {
-  const { savingsGoal, monthlySavingsGoal, totalSavings } = useSavingsGoal();
+  const { monthlySavingsGoal } = useSavingsGoal();
   const { finance } = useFinance();
   const expenses = finance?.expenses;
 
@@ -59,8 +79,6 @@ export function MonthlySavingProgress() {
     if (expense.category !== "savings") return total;
     return total + expense.cost;
   }, 0);
-
-  const totalProgress = savingsGoal ? (totalSavings / savingsGoal) * 100 : 0;
 
   const monthlyProgress =
     monthlySavingsGoal && thisMonthSavings
@@ -77,7 +95,7 @@ export function MonthlySavingProgress() {
           </div>
           <Progress
             value={monthlyProgress}
-            className="w-full mx-auto h-4"
+            className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-cyan-400 [&>div]:via-sky-500 [&>div]:to-indigo-500 [&>div]:rounded-l-full"
             id="monthlyProgress"
           />
           <p className="text-sm leading-6">
@@ -112,7 +130,7 @@ export function TotalSavingsGoal() {
           </div>
           <Progress
             value={totalProgress}
-            className="w-full mx-auto h-4"
+            className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-green-600 [&>div]:to-green-400 [&>div]:rounded-l-full"
             id="monthlyProgress"
           />
           <p className="text-sm leading-6">
