@@ -26,6 +26,7 @@ import {
   CommandItem,
   CommandList,
 } from "./ui/command";
+import { useSavingsGoal } from "@/lib/stores/SavingsGoalContext";
 
 export function BudgetCard() {
   const { finance } = useFinance();
@@ -49,7 +50,18 @@ export function BudgetCard() {
 }
 
 export function SavingProgression() {
-  return {};
+  const { savingsGoal, monthlySavingsGoal } = useSavingsGoal();
+  return (
+    <>
+      <Card className="w-full max-w-sm">
+        <CardContent className="flex flex-col gap-2 "></CardContent>
+        <CardFooter className="flex justify-between items-center">
+          <Button variant={"ghost"}>Edit</Button>
+          <AddExpenseDrawer />
+        </CardFooter>
+      </Card>
+    </>
+  );
 }
 
 export function AddExpenseDrawer() {
