@@ -27,6 +27,7 @@ import {
   CommandList,
 } from "./ui/command";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoalContext";
+import { Progress } from "./ui/progress";
 
 export function BudgetCard() {
   const { finance } = useFinance();
@@ -35,7 +36,7 @@ export function BudgetCard() {
     finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
   return (
     <>
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm h-full">
         <CardContent className="flex flex-col gap-2 ">
           <p>💰 Income: {income.toLocaleString()}</p>
           <p>💸 Expenses: {expenses.toLocaleString()}</p>
@@ -50,15 +51,43 @@ export function BudgetCard() {
 }
 
 export function SavingProgression() {
-  const { savingsGoal, monthlySavingsGoal } = useSavingsGoal();
+  const { savingsGoal, monthlySavingsGoal, totalSavings } = useSavingsGoal();
+  const { finance } = useFinance();
+  const expenses = finance?.expenses;
+
+  const thisMonthSavings = expenses?.reduce((total, expense) => {
+    if (expense.category !== "savings") return total;
+    return total + expense.cost;
+  }, 0);
+
+  const totalProgress = savingsGoal ? (totalSavings / savingsGoal) * 100 : 0;
+
+  const monthlyProgress =
+    monthlySavingsGoal && thisMonthSavings
+      ? (thisMonthSavings / monthlySavingsGoal) * 100
+      : 0;
+
   return (
     <>
-      <Card className="w-full max-w-sm">
-        <CardContent className="flex flex-col gap-2 "></CardContent>
-        <CardFooter className="flex justify-between items-center">
-          <Button variant={"ghost"}>Edit</Button>
-          <AddExpenseDrawer />
-        </CardFooter>
+      <Card className="w-full max-w-sm h-full my-auto">
+        <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
+          <Label className="text-sm " htmlFor="totalProgress">
+            Total:
+          </Label>
+          <Progress
+            value={totalProgress}
+            className="w-3/4 mx-auto"
+            id="totalProgress"
+          />
+          <Label className="text-sm" htmlFor="monthlyProgress">
+            This month:
+          </Label>
+          <Progress
+            value={monthlyProgress}
+            className="w-3/4 mx-auto"
+            id="monthlyProgress"
+          />
+        </CardContent>
       </Card>
     </>
   );

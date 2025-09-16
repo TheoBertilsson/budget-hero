@@ -2,7 +2,7 @@
 import ProtectedRoute from "../../components/ProtectedRoute";
 import FirstSetupCard from "@/components/FirstSetupCard";
 import { FinanceProvider, useFinance } from "@/lib/stores/FinanceContext";
-import { BudgetCard } from "@/components/Dashboard";
+import { BudgetCard, SavingProgression } from "@/components/Dashboard";
 import {
   SavingsProvider,
   useSavingsGoal,
@@ -12,9 +12,20 @@ function DashboardContent() {
   const { savingsGoal } = useSavingsGoal();
 
   return (
-    <main className="w-screen h-screen flex items-center justify-center">
-      {savingsGoal === null ? <FirstSetupCard /> : <BudgetCard />}
-    </main>
+    <>
+      {savingsGoal === null ? (
+        <main className="w-screen h-screen flex items-center justify-center">
+          <FirstSetupCard />
+        </main>
+      ) : (
+        <main className="w-screen h-screen flex items-center justify-center gap-5">
+          <section className="max-h-40 h-full flex items-center justify-center gap-5 w-full">
+            <SavingProgression />
+            <BudgetCard />
+          </section>
+        </main>
+      )}
+    </>
   );
 }
 

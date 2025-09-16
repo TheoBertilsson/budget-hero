@@ -38,7 +38,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
         const data = snap.data();
         setSavingsGoalState(data.savingsGoal ?? null);
         setMonthlySavingsGoalState(data.monthlySavingsGoal ?? null);
-        setTotalSavings(data.totalSavings ?? 0);
+        setTotalSavingsState(data.totalSavings ?? 0);
       }
       setLoading(false);
     };
@@ -74,7 +74,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     const savingGoalRef = doc(db, "users", user.uid, "finance", "savings");
     await setDoc(savingGoalRef, { totalSavings: price }, { merge: true });
 
-    setMonthlySavingsGoalState(price);
+    setTotalSavingsState(price);
   };
 
   const value: SavingsGoalContextType = {
