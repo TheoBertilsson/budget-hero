@@ -30,7 +30,6 @@ import {
 export function BudgetCard() {
   const { finance } = useFinance();
   const income = finance?.income || 0;
-  const savings = finance?.savingsGoal || 0;
   const expenses =
     finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
   return (
@@ -38,10 +37,7 @@ export function BudgetCard() {
       <Card className="w-full max-w-sm">
         <CardContent className="flex flex-col gap-2 ">
           <p>💰 Income: {income.toLocaleString()}</p>
-          <p>🏦 Savings: {savings.toLocaleString()}</p>
-          <p>
-            💸 Budget Left: {(income - savings - expenses).toLocaleString()}
-          </p>
+          <p>💸 Expenses: {expenses.toLocaleString()}</p>
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <Button variant={"ghost"}>Edit</Button>
