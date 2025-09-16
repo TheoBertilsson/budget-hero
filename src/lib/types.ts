@@ -35,10 +35,15 @@ export type DateContextType = {
 };
 export type SavingsGoalContextType = {
   savingsGoal: number | null;
-  monthlySavingsGoal: number | null;
+  monthlySavingsGoal: MonthlySavings | null;
   totalSavings: number;
   setSavingsGoal: (goal: number) => void;
-  setMonthlySavingsGoal: (goal: number) => void;
+  setMonthlySavingsGoal: (
+    totalGoal: number,
+    numberOfMonths: number,
+    startYear: number,
+    startMonth: number
+  ) => void;
   setTotalSavings: (price: number) => void;
   loading: boolean;
 };
@@ -46,4 +51,13 @@ export type SavingsGoalType = {
   savingsGoal: number | null;
   monthlySavingsGoal: number | null;
   loading: boolean;
+};
+
+export type MonthlySavings = {
+  [year: string]: {
+    [month: string]: {
+      goal: number; // monthly goal
+      paid: number; // how much was actually saved
+    };
+  };
 };

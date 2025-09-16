@@ -12,8 +12,10 @@ import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
 import { Slider } from "./ui/slider";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoalContext";
+import { useDate } from "@/lib/stores/DateContext";
 
 export default function FirstSetupCard() {
+  const { year, month } = useDate();
   const { setSavingsGoal, setMonthlySavingsGoal, setTotalSavings, loading } =
     useSavingsGoal();
   const [yearsOfSaving, setYearsOfSaving] = useState(3);
@@ -26,7 +28,12 @@ export default function FirstSetupCard() {
       throw new Error("Invalid Data");
     try {
       setSavingsGoal(savingsGoalState);
-      setMonthlySavingsGoal(Number(monthlySavingsGoal));
+      setMonthlySavingsGoal(
+        savingsGoalState,
+        yearsOfSaving * 12,
+        Number(year),
+        Number(month)
+      );
       setTotalSavings(0);
     } catch (error) {
       return;

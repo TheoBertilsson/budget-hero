@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { SavingsGoalContextType } from "../types";
+import { MonthlySavings, SavingsGoalContextType } from "../types";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -17,9 +17,8 @@ const SavingContext = createContext<SavingsGoalContextType | undefined>(
 
 export function SavingsProvider({ children }: { children: ReactNode }) {
   const [savingsGoal, setSavingsGoalState] = useState<number | null>(null);
-  const [monthlySavingsGoal, setMonthlySavingsGoalState] = useState<
-    number | null
-  >(null);
+  const [monthlySavingsGoal, setMonthlySavingsGoalState] =
+    useState<MonthlySavings | null>(null);
   const [totalSavings, setTotalSavingsState] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -58,23 +57,52 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   };
 
-  const setMonthlySavingsGoal = async (goal: number) => {
+  const setMonthlySavingsGoal = async (
+    totalGoal: number,
+    numberOfMonths: number,
+    startYear: number,
+    startMonth: number
+  ) => {
     const user = auth.currentUser;
     if (!user) throw new Error("No user signed in");
 
     const savingGoalRef = doc(db, "users", user.uid, "finance", "savings");
-    await setDoc(savingGoalRef, { monthlySavingsGoal: goal }, { merge: true });
 
-    setMonthlySavingsGoalState(goal);
+    const newMonthlySavings: MonthlySavings = {};
+    let remainingGoal = totalGoal;
+    let year = startYear;
+    let month = startMonth;
+
+    for (let i = 0; i < numberOfMonths; i++) {
+      const monthlyGoal = Math.ceil(totalGoal / numberOfMonths);
+      if (!newMonthlySavings[year]) newMonthlySavings[year] = {};
+      newMonthlySavings[year][month.toString().padStart(2, "0")] = {
+        goal: monthlyGoal,
+        paid: 0,
+      };
+      remainingGoal -= monthlyGoal;
+      month++;
+      if (month > 12) {
+        month = 1;
+        year++;
+      }
+    }
+
+    await setDoc(
+      savingGoalRef,
+      { monthlySavings: newMonthlySavings },
+      { merge: true }
+    );
+    setMonthlySavingsGoalState(newMonthlySavings);
   };
-  const setTotalSavings = async (price: number) => {
+
+  const setTotalSavings = async (total: number) => {
     const user = auth.currentUser;
     if (!user) throw new Error("No user signed in");
 
     const savingGoalRef = doc(db, "users", user.uid, "finance", "savings");
-    await setDoc(savingGoalRef, { totalSavings: price }, { merge: true });
 
-    setTotalSavingsState(price);
+    await setDoc(savingGoalRef, { totalSavings: total }, { merge: true });
   };
 
   const value: SavingsGoalContextType = {
