@@ -19,6 +19,7 @@ export type FinanceContextType = {
   finance: MonthlyFinance | null;
   loading: boolean;
   setFinance: (data: MonthlyFinance) => Promise<void>;
+  addExpense: (expense: Expense) => Promise<void>;
 };
 
 export type DateContextType = {

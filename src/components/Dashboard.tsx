@@ -1,7 +1,7 @@
 import { useFinance } from "@/lib/stores/FinanceContext";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { FormEvent, ReactNode, useState } from "react";
 import {
   Drawer,
   DrawerClose,
@@ -29,6 +29,7 @@ import {
 import { useSavingsGoal } from "@/lib/stores/SavingsGoalContext";
 import { Progress } from "./ui/progress";
 import { ChartRadialStacked } from "./ui/radialProgress";
+import { auth } from "@/lib/firebase";
 
 export function SummaryCard() {
   const { finance } = useFinance();
@@ -151,8 +152,32 @@ export function TotalSavingsGoal() {
 }
 
 export function AddExpenseDrawer() {
+  const { addExpense } = useFinance();
+  const [price, setPrice] = useState(0);
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setLoading(true);
+
+    await addExpense({ item: name, cost: price, category: category });
+
+    setLoading(false);
+
+    setPrice(0);
+    setName("");
+    setCategory("");
+
+    setOpen(false);
+  }
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button>Add Expense</Button>
       </DrawerTrigger>
@@ -164,7 +189,7 @@ export function AddExpenseDrawer() {
               Add and expenses for this month
             </DrawerDescription>
           </DrawerHeader>
-          <form className="p-4" id="expenseForm">
+          <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
             <div className="flex items-center justify-center space-x-2">
               <div className="flex flex-col gap-2">
                 <div className="flex-1 text-center">
@@ -179,6 +204,8 @@ export function AddExpenseDrawer() {
                     placeholder="0"
                     type="number"
                     min={1}
+                    value={price || ""}
+                    onChange={(e) => setPrice(Number(e.currentTarget.value))}
                     required
                     name="expensePrice"
                   />
@@ -194,6 +221,8 @@ export function AddExpenseDrawer() {
                     className="text-7xl font-bold tracking-tighter"
                     type="text"
                     required
+                    value={name || ""}
+                    onChange={(e) => setName(e.currentTarget.value)}
                     placeholder="Electrical bill"
                     name="expenseName"
                   />
@@ -202,13 +231,15 @@ export function AddExpenseDrawer() {
                   <p className="text-muted-foreground text-[0.70rem] uppercase">
                     Category
                   </p>
-                  <CategoryBox />
+                  <CategoryBox value={category} setValue={setCategory} />
                 </div>
               </div>
             </div>
           </form>
           <DrawerFooter>
-            <Button>Submit</Button>
+            <Button type="submit" form="expenseForm" disabled={loading}>
+              {loading ? "Please wait..." : "Add"}
+            </Button>
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>
             </DrawerClose>
@@ -250,9 +281,14 @@ const categories = [
   },
 ];
 
-export function CategoryBox() {
+export function CategoryBox({
+  value,
+  setValue,
+}: {
+  value: string;
+  setValue: (value: string) => void;
+}) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
