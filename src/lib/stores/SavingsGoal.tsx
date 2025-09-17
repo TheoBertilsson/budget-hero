@@ -103,14 +103,14 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     );
 
     setGoals((prev) => [...prev, newGoal]);
-    setLoading(false);
-    setMonthlySavingsGoal(
+    await setMonthlySavingsGoal(
       newGoalId,
       params.goal,
       calculatedTime,
       Number(year),
       Number(month)
     );
+    setLoading(false);
   };
 
   const addPayment = async (
@@ -193,6 +193,68 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const setMonthlySavingsGoal = async (
+    goalId: string,
+    totalGoal: number,
+    numberOfMonths: number,
+    startYear: number,
+    startMonth: number
+  ) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user signed in");
+
+    const savingGoalsRef = doc(db, "users", user.uid, "finance", "savingGoals");
+    const snap = await getDoc(savingGoalsRef);
+
+    if (!snap.exists()) throw new Error("Saving goals document does not exist");
+
+    const data = snap.data();
+    const goals: SavingGoalType[] = data.goals || [];
+
+    const goalIndex = goals.findIndex((g) => g.id === goalId);
+    if (goalIndex === -1) throw new Error("Goal not found");
+
+    const newMonthlySavings: (typeof goals)[number]["monthly"] = {};
+    let remainingGoal = totalGoal;
+    let year = startYear;
+    let month = startMonth;
+
+    for (let i = 0; i < numberOfMonths; i++) {
+      let monthlyGoal =
+        i === numberOfMonths - 1
+          ? remainingGoal
+          : Math.floor(totalGoal / numberOfMonths);
+      if (!newMonthlySavings[year]) newMonthlySavings[year] = {};
+      newMonthlySavings[year][month.toString().padStart(2, "0")] = {
+        goal: monthlyGoal,
+        paid: 0,
+      };
+      remainingGoal -= monthlyGoal;
+
+      month++;
+      if (month > 12) {
+        month = 1;
+        year++;
+      }
+    }
+
+    // Update the goal in the array
+    const updatedGoals = [...goals];
+
+    updatedGoals[goalIndex] = {
+      ...updatedGoals[goalIndex],
+      monthly: newMonthlySavings,
+    };
+
+    setGoals((prev) =>
+      prev.map((g) =>
+        g.id === updatedGoals[goalIndex].id ? updatedGoals[goalIndex] : g
+      )
+    );
+
+    await setDoc(savingGoalsRef, { goals: updatedGoals }, { merge: true });
+  };
+
   return (
     <SavingContext.Provider
       value={{ goals, mainGoal, addSavingsGoal, addPayment, loading }}
@@ -207,58 +269,3 @@ export function useSavingsGoal() {
     throw new Error("useSavingsGoal must be used within a SavingsProvider");
   return ctx;
 }
-
-const setMonthlySavingsGoal = async (
-  goalId: string,
-  totalGoal: number,
-  numberOfMonths: number,
-  startYear: number,
-  startMonth: number
-) => {
-  const user = auth.currentUser;
-  if (!user) throw new Error("No user signed in");
-
-  const savingGoalsRef = doc(db, "users", user.uid, "finance", "savingGoals");
-  const snap = await getDoc(savingGoalsRef);
-
-  if (!snap.exists()) throw new Error("Saving goals document does not exist");
-
-  const data = snap.data();
-  const goals: NewSavingGoalType[] = data.goals || [];
-
-  const goalIndex = goals.findIndex((g) => g.id === goalId);
-  if (goalIndex === -1) throw new Error("Goal not found");
-
-  const newMonthlySavings: (typeof goals)[number]["monthly"] = {};
-  let remainingGoal = totalGoal;
-  let year = startYear;
-  let month = startMonth;
-
-  for (let i = 0; i < numberOfMonths; i++) {
-    let monthlyGoal =
-      i === numberOfMonths - 1
-        ? remainingGoal
-        : Math.floor(totalGoal / numberOfMonths);
-    if (!newMonthlySavings[year]) newMonthlySavings[year] = {};
-    newMonthlySavings[year][month.toString().padStart(2, "0")] = {
-      goal: monthlyGoal,
-      paid: 0,
-    };
-    remainingGoal -= monthlyGoal;
-
-    month++;
-    if (month > 12) {
-      month = 1;
-      year++;
-    }
-  }
-
-  // Update the goal in the array
-  const updatedGoals = [...goals];
-  updatedGoals[goalIndex] = {
-    ...updatedGoals[goalIndex],
-    monthly: newMonthlySavings,
-  };
-
-  await setDoc(savingGoalsRef, { goals: updatedGoals }, { merge: true });
-};

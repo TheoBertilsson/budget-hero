@@ -49,11 +49,11 @@ export function SummaryCard() {
 }
 
 export function BudgetCard() {
-  const { finance } = useFinance();
-  const income =
-    finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
-  const expenses =
-    finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+  // const { finance } = useFinance();
+  // const income =
+  //   finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+  // const expenses =
+  //   finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
   return (
     <>
       <Card className="w-full h-full">
