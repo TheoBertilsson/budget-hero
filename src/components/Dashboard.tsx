@@ -21,6 +21,7 @@ import { useDate } from "@/lib/stores/DateContext";
 import ConfettiExplosion from "react-confetti-explosion";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { CategoryBox, GoalBox } from "./ComboBoxes";
+import { cn } from "@/lib/utils";
 
 export function SummaryCard() {
   const { finance } = useFinance();
@@ -49,11 +50,6 @@ export function SummaryCard() {
 }
 
 export function BudgetCard() {
-  // const { finance } = useFinance();
-  // const income =
-  //   finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
-  // const expenses =
-  //   finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
   return (
     <>
       <Card className="w-full h-full">
@@ -162,19 +158,36 @@ export function TotalSavingsGoal() {
 }
 
 export function AddExpenseDrawer() {
-  const { addExpense } = useFinance();
+  const { addExpense, finance } = useFinance();
   const [price, setPrice] = useState(0);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [comboboxError, setComboboxError] = useState(false);
+  const [moneyError, setMoneyError] = useState(false);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
+    setLoading(true);
     const user = auth.currentUser;
     if (!user) return;
 
-    setLoading(true);
+    const income =
+      finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+    const expenses =
+      finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+
+    if (income - expenses - price < 0) {
+      setMoneyError(true);
+      setLoading(false);
+      return;
+    }
+    if (!category) {
+      setComboboxError(true);
+      setLoading(false);
+      return;
+    }
 
     await addExpense({ item: name, cost: price, category: category });
 
@@ -195,8 +208,17 @@ export function AddExpenseDrawer() {
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
             <DrawerTitle>Add Expense</DrawerTitle>
-            <DrawerDescription>
-              Add and expenses for this month
+            <DrawerDescription
+              className={cn(moneyError ? "text-destructive" : "")}
+            >
+              {moneyError ? (
+                <>
+                  You don't have enough money for this <br /> Add an income
+                  first
+                </>
+              ) : (
+                "Add and expenses for this month"
+              )}
             </DrawerDescription>
           </DrawerHeader>
           <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
@@ -241,7 +263,12 @@ export function AddExpenseDrawer() {
                   <p className="text-muted-foreground text-[0.70rem] uppercase">
                     Category
                   </p>
-                  <CategoryBox value={category} setValue={setCategory} />
+                  <CategoryBox
+                    value={category}
+                    setValue={setCategory}
+                    error={comboboxError}
+                    setError={setComboboxError}
+                  />
                 </div>
               </div>
             </div>
@@ -357,6 +384,7 @@ function AddSavingDrawer() {
   const { year, month } = useDate();
   const [price, setPrice] = useState(0);
   const [goal, setGoal] = useState<{ value: string; label: string }>();
+  const [comboboxError, setComboboxError] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -367,7 +395,7 @@ function AddSavingDrawer() {
     if (!user) return;
 
     if (!goal) {
-      console.error("Select a goal to save to");
+      setComboboxError(true);
       return;
     }
     setLoading(true);
@@ -419,7 +447,12 @@ function AddSavingDrawer() {
                   <p className="text-muted-foreground text-[0.70rem] uppercase">
                     Goals
                   </p>
-                  <GoalBox selectedOption={goal} setSelectedOption={setGoal} />
+                  <GoalBox
+                    selectedOption={goal}
+                    setSelectedOption={setGoal}
+                    error={comboboxError}
+                    setError={setComboboxError}
+                  />
                 </div>
               </div>
             </div>

@@ -44,9 +44,13 @@ const categories = [
 export function CategoryBox({
   value,
   setValue,
+  error,
+  setError,
 }: {
   value: string;
   setValue: (value: string) => void;
+  error: boolean;
+  setError: (error: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -57,7 +61,10 @@ export function CategoryBox({
           variant={"outline"}
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className={cn(
+            "w-[200px] justify-between",
+            error ? "border border-destructive" : ""
+          )}
         >
           {value
             ? categories.find((category) => category.value === value)?.label
@@ -77,6 +84,7 @@ export function CategoryBox({
                   value={category.value}
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue);
+                    setError(false);
                     setOpen(false);
                   }}
                 >
@@ -100,6 +108,8 @@ export function CategoryBox({
 export function GoalBox({
   selectedOption,
   setSelectedOption,
+  error,
+  setError,
 }: {
   selectedOption:
     | {
@@ -115,6 +125,8 @@ export function GoalBox({
         }
       | undefined
   ) => void;
+  error: boolean;
+  setError: (error: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
   const { goals } = useSavingsGoal();
@@ -130,7 +142,10 @@ export function GoalBox({
           variant={"outline"}
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className={cn(
+            "w-[200px] justify-between",
+            error ? "border border-destructive" : ""
+          )}
         >
           {selectedOption?.label
             ? goalsMap.find((goal) => goal.value === selectedOption.value)
@@ -155,6 +170,7 @@ export function GoalBox({
                         ? undefined
                         : goalsMap.find((g) => g.value === currentValue)
                     );
+                    setError(false);
                     setOpen(false);
                   }}
                 >
