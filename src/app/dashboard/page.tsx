@@ -8,20 +8,22 @@ import {
   SummaryCard,
   TotalSavingsGoal,
 } from "@/components/Dashboard";
-import {
-  SavingsProvider,
-  useSavingsGoal,
-} from "@/lib/stores/SavingsGoalContext";
+import { SavingsProvider } from "@/lib/stores/SavingsGoalContext";
 import MonthSlider from "@/components/Carousel";
+import {
+  NewSavingProvider,
+  useNewSavingsGoal,
+} from "@/lib/stores/NewSavingsGoal";
+import SetupGoalCard from "@/components/Goals";
 
 function DashboardContent() {
-  const { savingsGoal } = useSavingsGoal();
+  const { goals } = useNewSavingsGoal();
 
   return (
     <>
-      {savingsGoal === null ? (
+      {!goals[0] ? (
         <main className="w-screen h-screen flex items-center justify-center">
-          <FirstSetupCard />
+          <SetupGoalCard />
         </main>
       ) : (
         <main className="w-screen h-screen flex flex-col items-center gap-5 py-5">
@@ -43,11 +45,13 @@ function DashboardContent() {
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <SavingsProvider>
-        <FinanceProvider>
-          <DashboardContent />
-        </FinanceProvider>
-      </SavingsProvider>
+      <NewSavingProvider>
+        <SavingsProvider>
+          <FinanceProvider>
+            <DashboardContent />
+          </FinanceProvider>
+        </SavingsProvider>
+      </NewSavingProvider>
     </ProtectedRoute>
   );
 }

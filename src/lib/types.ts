@@ -63,3 +63,40 @@ export type MonthlySavings = {
     };
   };
 };
+
+export type NewSavingGoalType = {
+  id: string;
+  type: "main" | "sub";
+  total: number;
+  goal: number;
+  timeInMonths: number;
+  hasDeadline: boolean;
+  monthly: MonthlySavings;
+};
+export type NewSavingGoalContextType = {
+  goals: NewSavingGoalType[];
+  addSavingsGoal: (params: AddSavingsGoalParams) => void;
+  addPayment: (
+    goalId: string,
+    year: string,
+    month: string,
+    amount: number
+  ) => void;
+  loading: boolean;
+};
+
+export type AddSavingsGoalParams =
+  | {
+      goal: number;
+      type: "main" | "sub";
+      hasDeadline: true;
+      timeInMonths: number;
+      monthlyGoal?: never;
+    }
+  | {
+      goal: number;
+      type: "main" | "sub";
+      hasDeadline: false;
+      timeInMonths?: never;
+      monthlyGoal: number;
+    };
