@@ -6,10 +6,11 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Expense, FinanceContextType, Income, MonthlyFinance } from "../types";
+import { Expense, FinanceContextType, MonthlyFinance, Payment } from "../types";
 import { auth, db } from "../firebase";
 import { arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
 import { useDate } from "./DateContext";
+import { useSavingsGoal } from "./SavingsGoalContext";
 
 const FinanceContext = createContext<FinanceContextType>({
   finance: null,
@@ -17,11 +18,13 @@ const FinanceContext = createContext<FinanceContextType>({
   setFinance: async () => {},
   addExpense: async () => {},
   addIncome: async () => {},
+  addSavings: async () => {},
 });
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
   const [finance, setFinanceState] = useState<MonthlyFinance | null>(null);
   const [loading, setLoading] = useState(true);
+  const { setTotalSavings, totalSavings, addPayment } = useSavingsGoal();
 
   const { year, month } = useDate();
 
@@ -99,7 +102,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const addIncome = async (income: Income) => {
+  const addIncome = async (income: Payment) => {
     const user = auth.currentUser;
     if (!user) throw new Error("No user signed in");
 
@@ -125,9 +128,45 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           }
     );
   };
+  const addSavings = async (year: string, month: string, savings: Payment) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user signed in");
+    const financeRef = doc(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      `${year}-${month}`
+    );
+
+    const expense = { ...savings, category: "Savings" };
+    await setDoc(
+      financeRef,
+      { expenses: arrayUnion(expense) },
+      { merge: true }
+    );
+    setFinanceState((prev) =>
+      prev
+        ? {
+            ...prev,
+            expenses: prev.expenses ? [...prev.expenses, expense] : [expense],
+          }
+        : { incomes: null, expenses: [expense] }
+    );
+
+    addPayment(year, month, savings);
+  };
+
   return (
     <FinanceContext.Provider
-      value={{ finance, loading, setFinance, addExpense, addIncome }}
+      value={{
+        finance,
+        loading,
+        setFinance,
+        addExpense,
+        addIncome,
+        addSavings,
+      }}
     >
       {children}
     </FinanceContext.Provider>

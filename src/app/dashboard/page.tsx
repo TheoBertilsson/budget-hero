@@ -41,11 +41,11 @@ function DashboardContent() {
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <FinanceProvider>
-        <SavingsProvider>
+      <SavingsProvider>
+        <FinanceProvider>
           <DashboardContent />
-        </SavingsProvider>
-      </FinanceProvider>
+        </FinanceProvider>
+      </SavingsProvider>
     </ProtectedRoute>
   );
 }

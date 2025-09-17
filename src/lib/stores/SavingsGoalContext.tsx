@@ -7,9 +7,20 @@ import {
   useEffect,
   useState,
 } from "react";
-import { MonthlySavings, SavingsGoalContextType } from "../types";
+import {
+  MonthlySavings,
+  Payment,
+  SavingsGoalContextType,
+  SavingsGoalType,
+} from "../types";
 import { auth, db } from "../firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  runTransaction,
+  setDoc,
+} from "firebase/firestore";
 
 const SavingContext = createContext<SavingsGoalContextType | undefined>(
   undefined
@@ -35,9 +46,9 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
       if (snap.exists()) {
         const data = snap.data();
-        setSavingsGoalState(data.savingsGoal ?? null);
-        setMonthlySavingsGoalState(data.monthlySavingsGoal ?? null);
-        setTotalSavingsState(data.totalSavings ?? 0);
+        setSavingsGoalState(data.goal ?? null);
+        setMonthlySavingsGoalState(data.monthly ?? null);
+        setTotalSavingsState(data.total ?? 0);
       }
       setLoading(false);
     };
@@ -51,7 +62,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     setLoading(true);
 
     const savingGoalRef = doc(db, "users", user.uid, "finance", "savings");
-    await setDoc(savingGoalRef, { savingsGoal: goal }, { merge: true });
+    await setDoc(savingGoalRef, { goal: goal }, { merge: true });
 
     setSavingsGoalState(goal);
     setLoading(false);
@@ -90,7 +101,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
     await setDoc(
       savingGoalRef,
-      { monthlySavings: newMonthlySavings },
+      { monthly: newMonthlySavings },
       { merge: true }
     );
     setMonthlySavingsGoalState(newMonthlySavings);
@@ -102,7 +113,64 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
     const savingGoalRef = doc(db, "users", user.uid, "finance", "savings");
 
-    await setDoc(savingGoalRef, { totalSavings: total }, { merge: true });
+    await setDoc(savingGoalRef, { total: total }, { merge: true });
+    setTotalSavingsState(total);
+  };
+
+  const addPayment = async (year: string, month: string, savings: Payment) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user signed in");
+    const savingGoalRef = doc(db, "users", user.uid, "finance", "savings");
+
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(savingGoalRef);
+      if (!snap.exists()) throw new Error("Savings data not found");
+
+      const data = snap.data() as SavingsGoalType;
+      const { goal, total = 0, monthly } = data;
+
+      if (!monthly || !goal || total === null) return;
+
+      if (!monthly[year]) monthly[year] = {};
+      if (!monthly[year][month]) monthly[year][month] = { goal: 0, paid: 0 };
+
+      monthly[year][month].paid += savings.cost;
+
+      const currentGoal = monthly[year][month].goal ?? 0;
+      const currentPaid = monthly[year][month].paid;
+      const leftover = Math.max(currentGoal - currentPaid, 0);
+
+      const months = Object.entries(monthly)
+        .flatMap(([y, monthsObj]) =>
+          Object.keys(monthsObj).map((m) => ({ year: y, month: m }))
+        )
+        .sort(
+          (a, b) =>
+            new Date(`${a.year}-${a.month}-01`).getTime() -
+            new Date(`${b.year}-${b.month}-01`).getTime()
+        );
+
+      const remainingMonths = months.filter(
+        ({ year: y, month: m }) => !(y === year && m === month)
+      );
+
+      const newTotal = total + savings.cost;
+      const remainingGoal = goal - newTotal + leftover;
+      if (remainingGoal > 0 && remainingMonths.length > 0) {
+        const newMonthlyGoal = Math.ceil(
+          remainingGoal / remainingMonths.length
+        );
+        remainingMonths.forEach(({ year: y, month: m }) => {
+          if (!monthly[y]) monthly[y] = {};
+          if (!monthly[y][m]) monthly[y][m] = { goal: 0, paid: 0 };
+          monthly[y][m].goal = newMonthlyGoal;
+        });
+      }
+
+      tx.set(savingGoalRef, { total: newTotal, monthly }, { merge: true });
+      setTotalSavingsState(newTotal);
+      setMonthlySavingsGoalState(monthly);
+    });
   };
 
   const value: SavingsGoalContextType = {
@@ -112,6 +180,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     setSavingsGoal,
     setMonthlySavingsGoal,
     setTotalSavings,
+    addPayment,
     loading,
   };
 

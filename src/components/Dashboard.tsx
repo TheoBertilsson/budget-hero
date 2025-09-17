@@ -30,6 +30,7 @@ import { useSavingsGoal } from "@/lib/stores/SavingsGoalContext";
 import { Progress } from "./ui/progress";
 import { ChartRadialStacked } from "./ui/radialProgress";
 import { auth } from "@/lib/firebase";
+import { useDate } from "@/lib/stores/DateContext";
 
 export function SummaryCard() {
   const { finance } = useFinance();
@@ -66,6 +67,7 @@ export function BudgetCard() {
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <AddIncomeDrawer />
+          <AddSavingDrawer />
           <AddExpenseDrawer />
         </CardFooter>
       </Card>
@@ -75,18 +77,15 @@ export function BudgetCard() {
 
 export function MonthlySavingProgress() {
   const { monthlySavingsGoal } = useSavingsGoal();
-  const { finance } = useFinance();
-  const expenses = finance?.expenses;
+  const { year, month } = useDate();
 
-  const thisMonthSavings = expenses?.reduce((total, expense) => {
-    if (expense.category !== "savings") return total;
-    return total + expense.cost;
-  }, 0);
+  const thisMonthSavings = monthlySavingsGoal?.[year]?.[month]?.paid ?? 0;
 
-  const monthlyProgress =
-    monthlySavingsGoal && thisMonthSavings
-      ? (thisMonthSavings / monthlySavingsGoal) * 100
-      : 0;
+  const goalThisMonth = monthlySavingsGoal?.[year]?.[month]?.goal ?? 0;
+
+  const monthlyProgress = goalThisMonth
+    ? Math.ceil((thisMonthSavings / goalThisMonth) * 100)
+    : 0;
 
   return (
     <>
@@ -94,7 +93,7 @@ export function MonthlySavingProgress() {
         <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
           <div className="flex justify-between">
             <p>0 SEK</p>
-            <p>{monthlySavingsGoal?.toLocaleString()} SEK</p>
+            <p>{goalThisMonth?.toLocaleString()} SEK</p>
           </div>
           <Progress
             value={monthlyProgress}
@@ -121,7 +120,9 @@ export function MonthlySavingProgress() {
 export function TotalSavingsGoal() {
   const { savingsGoal, totalSavings } = useSavingsGoal();
 
-  const totalProgress = savingsGoal ? (totalSavings / savingsGoal) * 100 : 0;
+  const totalProgress = savingsGoal
+    ? Math.ceil((totalSavings / savingsGoal) * 100)
+    : 0;
 
   return (
     <>
@@ -342,6 +343,99 @@ function AddIncomeDrawer() {
     </Drawer>
   );
 }
+
+function AddSavingDrawer() {
+  const { addSavings } = useFinance();
+  const { year, month } = useDate();
+  const [price, setPrice] = useState(0);
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setLoading(true);
+
+    await addSavings(year, month, { item: name, cost: price });
+
+    setLoading(false);
+
+    setPrice(0);
+    setName("");
+
+    setOpen(false);
+  }
+  return (
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
+        <Button className="bg-blue-500 hover:bg-blue-500/90 font-bold">
+          Add Savings
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="mx-auto w-full max-w-sm">
+          <DrawerHeader>
+            <DrawerTitle>Add Savings</DrawerTitle>
+            <DrawerDescription>Add savings for this month</DrawerDescription>
+          </DrawerHeader>
+          <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
+            <div className="flex items-center justify-center space-x-2">
+              <div className="flex flex-col gap-2">
+                <div className="flex-1 text-center">
+                  <Label
+                    className="text-muted-foreground text-[0.70rem] uppercase"
+                    htmlFor="savingsPrice"
+                  >
+                    SEK
+                  </Label>
+                  <Input
+                    className="text-7xl font-bold tracking-tighter"
+                    placeholder="0"
+                    type="number"
+                    min={1}
+                    value={price || ""}
+                    onChange={(e) => setPrice(Number(e.currentTarget.value))}
+                    required
+                    name="savingsPrice"
+                  />
+                </div>
+                <div className="flex-1 text-center">
+                  <Label
+                    className="text-muted-foreground text-[0.70rem] uppercase"
+                    htmlFor="savingsName"
+                  >
+                    Name
+                  </Label>
+                  <Input
+                    className="text-7xl font-bold tracking-tighter"
+                    type="text"
+                    required
+                    value={name || ""}
+                    onChange={(e) => setName(e.currentTarget.value)}
+                    placeholder="Salary"
+                    name="savingsName"
+                  />
+                </div>
+              </div>
+            </div>
+          </form>
+          <DrawerFooter>
+            <Button type="submit" form="expenseForm" disabled={loading}>
+              {loading ? "Please wait..." : "Add"}
+            </Button>
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
 const categories = [
   {
     value: "housing",
@@ -362,10 +456,6 @@ const categories = [
   {
     value: "health",
     label: "Health",
-  },
-  {
-    value: "savings",
-    label: "Savings",
   },
   {
     value: "miscellaneous",

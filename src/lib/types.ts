@@ -1,5 +1,5 @@
 export type MonthlyFinance = {
-  incomes: Income[] | null;
+  incomes: Payment[] | null;
   expenses: Expense[] | null;
 };
 
@@ -8,7 +8,7 @@ export type Expense = {
   cost: number;
   category: string;
 };
-export type Income = {
+export type Payment = {
   item: string;
   cost: number;
 };
@@ -24,7 +24,8 @@ export type FinanceContextType = {
   loading: boolean;
   setFinance: (data: MonthlyFinance) => Promise<void>;
   addExpense: (expense: Expense) => Promise<void>;
-  addIncome: (income: Income) => Promise<void>;
+  addIncome: (income: Payment) => Promise<void>;
+  addSavings: (year: string, month: string, savings: Payment) => Promise<void>;
 };
 
 export type DateContextType = {
@@ -45,12 +46,13 @@ export type SavingsGoalContextType = {
     startMonth: number
   ) => void;
   setTotalSavings: (price: number) => void;
+  addPayment: (year: string, month: string, savings: Payment) => void;
   loading: boolean;
 };
 export type SavingsGoalType = {
-  savingsGoal: number | null;
-  monthlySavingsGoal: number | null;
-  loading: boolean;
+  goal: number | null;
+  monthly: MonthlySavings | null;
+  total: number | null;
 };
 
 export type MonthlySavings = {
