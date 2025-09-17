@@ -24,7 +24,7 @@ const FinanceContext = createContext<FinanceContextType>({
 export function FinanceProvider({ children }: { children: ReactNode }) {
   const [finance, setFinanceState] = useState<MonthlyFinance | null>(null);
   const [loading, setLoading] = useState(true);
-  const { setTotalSavings, totalSavings, addPayment } = useSavingsGoal();
+  const { addPayment } = useSavingsGoal();
 
   const { year, month } = useDate();
 
@@ -48,7 +48,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
       if (snap.exists()) {
         setFinanceState(snap.data() as MonthlyFinance);
+      } else {
+        setFinanceState({ incomes: [], expenses: [] }); // default if doc missing
       }
+
       setLoading(false);
     };
 

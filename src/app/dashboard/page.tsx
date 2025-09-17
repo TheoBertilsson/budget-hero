@@ -12,6 +12,7 @@ import {
   SavingsProvider,
   useSavingsGoal,
 } from "@/lib/stores/SavingsGoalContext";
+import MonthSlider from "@/components/Carousel";
 
 function DashboardContent() {
   const { savingsGoal } = useSavingsGoal();
@@ -23,12 +24,13 @@ function DashboardContent() {
           <FirstSetupCard />
         </main>
       ) : (
-        <main className="w-screen h-screen flex flex-col items-center justify-center gap-5">
+        <main className="w-screen h-screen flex flex-col items-center gap-5 py-5">
           <header className="w-full max-w-3/4 flex flex-col gap-5">
+            <MonthSlider />
             <SummaryCard />
             <TotalSavingsGoal />
           </header>
-          <section className="max-h-96 max-w-3/4 md:max-h-40 h-full flex items-center justify-center gap-5 w-full md:flex-row flex-col">
+          <section className="h-fit max-w-3/4 lg:max-h-40 lg:h-full flex items-center justify-center gap-5 w-full lg:flex-row flex-col">
             <MonthlySavingProgress />
             <BudgetCard />
           </section>

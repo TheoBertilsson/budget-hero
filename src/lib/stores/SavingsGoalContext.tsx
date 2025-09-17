@@ -21,6 +21,7 @@ import {
   runTransaction,
   setDoc,
 } from "firebase/firestore";
+import { useDate } from "./DateContext";
 
 const SavingContext = createContext<SavingsGoalContextType | undefined>(
   undefined
@@ -28,6 +29,7 @@ const SavingContext = createContext<SavingsGoalContextType | undefined>(
 
 export function SavingsProvider({ children }: { children: ReactNode }) {
   const [savingsGoal, setSavingsGoalState] = useState<number | null>(null);
+  const { year, month } = useDate();
   const [monthlySavingsGoal, setMonthlySavingsGoalState] =
     useState<MonthlySavings | null>(null);
   const [totalSavings, setTotalSavingsState] = useState(0);
@@ -53,7 +55,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     };
     fetchSavings();
-  }, []);
+  }, [year, month]);
 
   const setSavingsGoal = async (goal: number) => {
     const user = auth.currentUser;

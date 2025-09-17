@@ -1,7 +1,7 @@
 import { useFinance } from "@/lib/stores/FinanceContext";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import {
   Drawer,
   DrawerClose,
@@ -34,10 +34,16 @@ import { useDate } from "@/lib/stores/DateContext";
 
 export function SummaryCard() {
   const { finance } = useFinance();
-  const income =
-    finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
-  const expenses =
+  const { year, month } = useDate();
+  let income = finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+  let expenses =
     finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+
+  useEffect(() => {
+    income = finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+    expenses =
+      finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+  }, [year, month]);
   return (
     <>
       <Card className="w-full h-full">
@@ -61,11 +67,11 @@ export function BudgetCard() {
   return (
     <>
       <Card className="w-full h-full">
-        <CardContent className="flex flex-col gap-2 ">
+        {/* <CardContent className="flex flex-col gap-2 ">
           <p>💰 Income: {income.toLocaleString()}</p>
           <p>💸 Expenses: {expenses.toLocaleString()}</p>
-        </CardContent>
-        <CardFooter className="flex justify-between items-center">
+        </CardContent> */}
+        <CardFooter className="flex flex-wrap lg:flex-nowrap justify-evenly items-center gap-2">
           <AddIncomeDrawer />
           <AddSavingDrawer />
           <AddExpenseDrawer />
@@ -91,12 +97,12 @@ export function MonthlySavingProgress() {
     <>
       <Card className="w-full h-full my-auto">
         <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
-          <div className="flex justify-between">
+          <div className="flex justify-between text-sm">
             <p>0 SEK</p>
             <p>{goalThisMonth?.toLocaleString()} SEK</p>
           </div>
           <Progress
-            value={monthlyProgress}
+            value={monthlyProgress > 100 ? 100 : monthlyProgress}
             className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-cyan-400 [&>div]:via-sky-500 [&>div]:to-indigo-500 [&>div]:rounded-l-full"
             id="monthlyProgress"
           />
@@ -128,7 +134,7 @@ export function TotalSavingsGoal() {
     <>
       <Card className="w-full h-full my-auto">
         <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
-          <div className="flex justify-between">
+          <div className="flex justify-between text-sm md:text-base">
             <p>0 SEK</p>
             <p>{savingsGoal?.toLocaleString()} SEK</p>
           </div>
