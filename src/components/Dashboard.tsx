@@ -31,6 +31,7 @@ import { Progress } from "./ui/progress";
 import { ChartRadialStacked } from "./ui/radialProgress";
 import { auth } from "@/lib/firebase";
 import { useDate } from "@/lib/stores/DateContext";
+import ConfettiExplosion from "react-confetti-explosion";
 
 export function SummaryCard() {
   const { finance } = useFinance();
@@ -101,11 +102,17 @@ export function MonthlySavingProgress() {
             <p>0 SEK</p>
             <p>{goalThisMonth?.toLocaleString()} SEK</p>
           </div>
-          <Progress
-            value={monthlyProgress > 100 ? 100 : monthlyProgress}
-            className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-cyan-400 [&>div]:via-sky-500 [&>div]:to-indigo-500 [&>div]:rounded-l-full"
-            id="monthlyProgress"
-          />
+          <div className="flex flex-col justify-center items-center">
+            <Progress
+              value={monthlyProgress > 100 ? 100 : monthlyProgress}
+              className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-cyan-400 [&>div]:via-sky-500 [&>div]:to-indigo-500 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
+              id="monthlyProgress"
+            />
+            {monthlyProgress >= 100 && (
+              <ConfettiExplosion className="" duration={5000} />
+            )}
+          </div>
+
           <p className="text-sm leading-6">
             This month you have saved{" "}
             <span className="font-bold">
@@ -138,11 +145,16 @@ export function TotalSavingsGoal() {
             <p>0 SEK</p>
             <p>{savingsGoal?.toLocaleString()} SEK</p>
           </div>
-          <Progress
-            value={totalProgress}
-            className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-green-600 [&>div]:to-green-400 [&>div]:rounded-l-full"
-            id="monthlyProgress"
-          />
+          <div className="flex justify-center items-center">
+            <Progress
+              value={totalProgress > 100 ? 100 : totalProgress}
+              className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-green-600 [&>div]:to-green-400 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
+              id="monthlyProgress"
+            />
+            {totalProgress >= 100 && (
+              <ConfettiExplosion className="" duration={5000} />
+            )}
+          </div>
           <p className="text-sm leading-6">
             You have saved a total of{" "}
             <span className="font-bold">
