@@ -77,6 +77,7 @@ export function ChartRadialStacked({
           cornerRadius={5}
           fill="var(--color-expenses)"
           className="stroke-transparent stroke-2"
+          isAnimationActive={true}
         />
         <RadialBar
           dataKey="income"
@@ -84,6 +85,7 @@ export function ChartRadialStacked({
           stackId="a"
           cornerRadius={5}
           className="stroke-transparent stroke-2"
+          isAnimationActive={true}
         />
       </RadialBarChart>
     </ChartContainer>

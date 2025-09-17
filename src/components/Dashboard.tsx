@@ -24,23 +24,17 @@ import { CategoryBox, GoalBox } from "./ComboBoxes";
 import { cn } from "@/lib/utils";
 
 export function SummaryCard() {
-  const { finance } = useFinance();
-  const { year, month } = useDate();
-  let income = finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
-  let expenses =
-    finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+  const { incomes, expenses } = useFinance();
 
-  useEffect(() => {
-    income = finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
-    expenses =
-      finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
-  }, [year, month]);
   return (
     <>
       <Card className="w-full h-full">
         <CardContent className="flex flex-col gap-2 w-full h-full ">
           <div className="flex items-center justify-center">
-            <ChartRadialStacked expenses={expenses} income={income} />
+            <ChartRadialStacked
+              expenses={expenses || 0}
+              income={incomes || 0}
+            />
           </div>
         </CardContent>
         <CardFooter className="flex justify-between items-center"></CardFooter>
@@ -53,11 +47,7 @@ export function BudgetCard() {
   return (
     <>
       <Card className="w-full h-full">
-        {/* <CardContent className="flex flex-col gap-2 ">
-          <p>💰 Income: {income.toLocaleString()}</p>
-          <p>💸 Expenses: {expenses.toLocaleString()}</p>
-        </CardContent> */}
-        <CardFooter className="flex flex-wrap lg:flex-nowrap justify-evenly items-center gap-2">
+        <CardFooter className="flex flex-wrap lg:flex-nowrap justify-evenly items-center gap-2 h-full">
           <AddIncomeDrawer />
           <AddSavingDrawer />
           <AddExpenseDrawer />
@@ -158,14 +148,15 @@ export function TotalSavingsGoal() {
 }
 
 export function AddExpenseDrawer() {
-  const { addExpense, finance } = useFinance();
+  const { addExpense, incomes, expenses } = useFinance();
   const [price, setPrice] = useState(0);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [comboboxError, setComboboxError] = useState(false);
-  const [moneyError, setMoneyError] = useState(false);
+
+  const moneyLeft = (incomes || 0) - (expenses || 0);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -173,16 +164,6 @@ export function AddExpenseDrawer() {
     const user = auth.currentUser;
     if (!user) return;
 
-    const income =
-      finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
-    const expenses =
-      finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
-
-    if (income - expenses - price < 0) {
-      setMoneyError(true);
-      setLoading(false);
-      return;
-    }
     if (!category) {
       setComboboxError(true);
       setLoading(false);
@@ -202,23 +183,25 @@ export function AddExpenseDrawer() {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant={"destructive"}>Add Expense</Button>
+        <Button variant={"destructive"} disabled={!moneyLeft}>
+          Add Expense
+        </Button>
       </DrawerTrigger>
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
-            <DrawerTitle>Add Expense</DrawerTitle>
-            <DrawerDescription
-              className={cn(moneyError ? "text-destructive" : "")}
+            <DrawerTitle
+              className={cn(moneyLeft - price < 0 && "text-destructive")}
             >
-              {moneyError ? (
-                <>
-                  You don't have enough money for this <br /> Add an income
-                  first
-                </>
-              ) : (
-                "Add and expenses for this month"
-              )}
+              {" "}
+              {moneyLeft - price < 0 ? "No money left!" : "Add expense"}
+            </DrawerTitle>
+            <DrawerDescription
+              className={cn(moneyLeft - price < 0 && "text-destructive")}
+            >
+              {moneyLeft - price < 0
+                ? "Add an Income before continuing!"
+                : "Add an expenses for this month"}
             </DrawerDescription>
           </DrawerHeader>
           <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
@@ -274,7 +257,11 @@ export function AddExpenseDrawer() {
             </div>
           </form>
           <DrawerFooter>
-            <Button type="submit" form="expenseForm" disabled={loading}>
+            <Button
+              type="submit"
+              form="expenseForm"
+              disabled={loading || moneyLeft - price < 0}
+            >
               {loading ? "Please wait..." : "Add"}
             </Button>
             <DrawerClose asChild>
@@ -379,15 +366,16 @@ function AddIncomeDrawer() {
 }
 
 function AddSavingDrawer() {
-  const { addSavings } = useFinance();
+  const { addSavings, incomes, expenses } = useFinance();
   const { addPayment } = useSavingsGoal();
   const { year, month } = useDate();
   const [price, setPrice] = useState(0);
   const [goal, setGoal] = useState<{ value: string; label: string }>();
   const [comboboxError, setComboboxError] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const moneyLeft = (incomes || 0) - (expenses || 0);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -412,15 +400,29 @@ function AddSavingDrawer() {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button className="bg-blue-500 hover:bg-blue-500/90 font-bold">
+        <Button
+          className="bg-blue-500 hover:bg-blue-500/90 font-bold"
+          disabled={moneyLeft <= 0}
+        >
           Add Savings
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
-            <DrawerTitle>Add Savings</DrawerTitle>
-            <DrawerDescription>Add savings for this month</DrawerDescription>
+            <DrawerTitle
+              className={cn(moneyLeft - price < 0 && "text-destructive")}
+            >
+              {" "}
+              {moneyLeft - price < 0 ? "No money left!" : "Add savings"}
+            </DrawerTitle>
+            <DrawerDescription
+              className={cn(moneyLeft - price < 0 && "text-destructive")}
+            >
+              {moneyLeft - price < 0
+                ? " Add an Income before continuing!"
+                : "Add savings for this month"}
+            </DrawerDescription>
           </DrawerHeader>
           <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
             <div className="flex items-center justify-center space-x-2">
@@ -458,7 +460,11 @@ function AddSavingDrawer() {
             </div>
           </form>
           <DrawerFooter>
-            <Button type="submit" form="expenseForm" disabled={loading}>
+            <Button
+              type="submit"
+              form="expenseForm"
+              disabled={loading || moneyLeft - price < 0}
+            >
               {loading ? "Please wait..." : "Add"}
             </Button>
             <DrawerClose asChild>
