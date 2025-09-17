@@ -32,6 +32,8 @@ import { ChartRadialStacked } from "./ui/radialProgress";
 import { auth } from "@/lib/firebase";
 import { useDate } from "@/lib/stores/DateContext";
 import ConfettiExplosion from "react-confetti-explosion";
+import { useNewSavingsGoal } from "@/lib/stores/NewSavingsGoal";
+import { CategoryBox, GoalBox } from "./ComboBoxes";
 
 export function SummaryCard() {
   const { finance } = useFinance();
@@ -83,12 +85,12 @@ export function BudgetCard() {
 }
 
 export function MonthlySavingProgress() {
-  const { monthlySavingsGoal } = useSavingsGoal();
+  const { mainGoal } = useNewSavingsGoal();
   const { year, month } = useDate();
 
-  const thisMonthSavings = monthlySavingsGoal?.[year]?.[month]?.paid ?? 0;
+  const thisMonthSavings = mainGoal?.monthly?.[year]?.[month]?.paid ?? 0;
 
-  const goalThisMonth = monthlySavingsGoal?.[year]?.[month]?.goal ?? 0;
+  const goalThisMonth = mainGoal?.monthly?.[year]?.[month]?.goal ?? 0;
 
   const monthlyProgress = goalThisMonth
     ? Math.ceil((thisMonthSavings / goalThisMonth) * 100)
@@ -131,10 +133,10 @@ export function MonthlySavingProgress() {
 }
 
 export function TotalSavingsGoal() {
-  const { savingsGoal, totalSavings } = useSavingsGoal();
+  const { mainGoal } = useNewSavingsGoal();
 
-  const totalProgress = savingsGoal
-    ? Math.ceil((totalSavings / savingsGoal) * 100)
+  const totalProgress = mainGoal?.goal
+    ? Math.ceil((mainGoal.total / mainGoal.goal) * 100)
     : 0;
 
   return (
@@ -143,7 +145,7 @@ export function TotalSavingsGoal() {
         <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
           <div className="flex justify-between text-sm md:text-base">
             <p>0 SEK</p>
-            <p>{savingsGoal?.toLocaleString()} SEK</p>
+            <p>{mainGoal?.goal?.toLocaleString()} SEK</p>
           </div>
           <div className="flex justify-center items-center">
             <Progress
@@ -158,7 +160,7 @@ export function TotalSavingsGoal() {
           <p className="text-sm leading-6">
             You have saved a total of{" "}
             <span className="font-bold">
-              {totalSavings?.toLocaleString() || 0}
+              {mainGoal?.total?.toLocaleString() || 0}
             </span>{" "}
             SEK!
             <br /> That is <span className="font-bold">
@@ -364,9 +366,11 @@ function AddIncomeDrawer() {
 
 function AddSavingDrawer() {
   const { addSavings } = useFinance();
+  const { addPayment } = useNewSavingsGoal();
   const { year, month } = useDate();
   const [price, setPrice] = useState(0);
-  const [name, setName] = useState("");
+  const [goal, setGoal] = useState<{ value: string; label: string }>();
+
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -375,14 +379,18 @@ function AddSavingDrawer() {
     const user = auth.currentUser;
     if (!user) return;
 
+    if (!goal) {
+      console.error("Select a goal to save to");
+      return;
+    }
     setLoading(true);
 
-    await addSavings(year, month, { item: name, cost: price });
-
+    await addSavings(year, month, { item: goal?.label || "", cost: price });
+    await addPayment(goal?.value, year, month, price);
     setLoading(false);
 
     setPrice(0);
-    setName("");
+    setGoal({ label: "", value: "" });
 
     setOpen(false);
   }
@@ -421,21 +429,10 @@ function AddSavingDrawer() {
                   />
                 </div>
                 <div className="flex-1 text-center">
-                  <Label
-                    className="text-muted-foreground text-[0.70rem] uppercase"
-                    htmlFor="savingsName"
-                  >
-                    Name
-                  </Label>
-                  <Input
-                    className="text-7xl font-bold tracking-tighter"
-                    type="text"
-                    required
-                    value={name || ""}
-                    onChange={(e) => setName(e.currentTarget.value)}
-                    placeholder="Salary"
-                    name="savingsName"
-                  />
+                  <p className="text-muted-foreground text-[0.70rem] uppercase">
+                    Goals
+                  </p>
+                  <GoalBox selectedOption={goal} setSelectedOption={setGoal} />
                 </div>
               </div>
             </div>
@@ -451,88 +448,5 @@ function AddSavingDrawer() {
         </div>
       </DrawerContent>
     </Drawer>
-  );
-}
-
-const categories = [
-  {
-    value: "housing",
-    label: "Housing",
-  },
-  {
-    value: "transport",
-    label: "Transport",
-  },
-  {
-    value: "food",
-    label: "Food",
-  },
-  {
-    value: "entertainment",
-    label: "Entertainment",
-  },
-  {
-    value: "health",
-    label: "Health",
-  },
-  {
-    value: "miscellaneous",
-    label: "Miscellaneous",
-  },
-];
-
-export function CategoryBox({
-  value,
-  setValue,
-}: {
-  value: string;
-  setValue: (value: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          role="combobox"
-          aria-expanded={open}
-          className="w-[200px] justify-between"
-        >
-          {value
-            ? categories.find((category) => category.value === value)?.label
-            : "Select category..."}
-          <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
-        <Command>
-          <CommandInput placeholder="Search category..." />
-          <CommandList>
-            <CommandEmpty>No categories found.</CommandEmpty>
-            <CommandGroup>
-              {categories.map((category) => (
-                <CommandItem
-                  key={category.value}
-                  value={category.value}
-                  onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
-                >
-                  <CheckIcon
-                    className={cn(
-                      "ml-auto",
-                      value === category.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {category.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
   );
 }

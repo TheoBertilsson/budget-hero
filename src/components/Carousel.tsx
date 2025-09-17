@@ -33,7 +33,6 @@ export default function MonthSlider() {
   const { year, setMonth, month, setYear } = useDate();
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
-  console.log("current :", year + " " + month);
   React.useEffect(() => {
     if (!api) return;
 

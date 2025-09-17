@@ -30,6 +30,7 @@ const NewSavingContext = createContext<NewSavingGoalContextType | undefined>(
 export function NewSavingProvider({ children }: { children: ReactNode }) {
   const { year, month } = useDate();
   const [goals, setGoals] = useState<NewSavingGoalType[]>([]);
+  const mainGoal = goals.find((goal) => goal.type === "main") || null;
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -66,27 +67,38 @@ export function NewSavingProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
 
+    const savingGoalsRef = doc(db, "users", user.uid, "finance", "savingGoals");
+    const snap = await getDoc(savingGoalsRef);
+    const data = snap.exists() ? snap.data() : { goals: [] };
+    const goals: NewSavingGoalType[] = data.goals || [];
+
+    // If adding a new main goal, downgrade any existing main goal to sub
+    if (params.type === "main") {
+      goals.forEach((g) => {
+        if (g.type === "main") g.type = "sub";
+      });
+    }
+
     const newGoalId = uuidv4();
     const calculatedTime =
       !params.timeInMonths && params.monthlyGoal
         ? Math.ceil(params.goal / params.monthlyGoal)
         : params.timeInMonths || 0;
 
-    const savingGoalRef = doc(db, "users", user.uid, "finance", "savingGoals");
-
     const newGoal: NewSavingGoalType = {
       id: newGoalId,
       type: params.type,
       total: 0,
       goal: params.goal,
+      name: params.name,
       hasDeadline: true,
       timeInMonths: calculatedTime, // required because hasDeadline is true
       monthly: {},
     };
 
     await setDoc(
-      savingGoalRef,
-      { goals: arrayUnion(newGoal) },
+      savingGoalsRef,
+      { ...goals, goals: arrayUnion(newGoal) },
       { merge: true }
     );
 
@@ -111,6 +123,8 @@ export function NewSavingProvider({ children }: { children: ReactNode }) {
     if (!user) throw new Error("No user signed in");
 
     const savingGoalRef = doc(db, "users", user.uid, "finance", "savingGoals");
+
+    let updatedGoal: NewSavingGoalType | null = null;
 
     await runTransaction(db, async (tx) => {
       const snap = await tx.get(savingGoalRef);
@@ -168,12 +182,20 @@ export function NewSavingProvider({ children }: { children: ReactNode }) {
       updatedGoals[goalIndex] = goal;
 
       tx.set(savingGoalRef, { goals: updatedGoals }, { merge: true });
+
+      updatedGoal = goal;
     });
+
+    if (updatedGoal) {
+      setGoals((prev) =>
+        prev.map((g) => (g.id === updatedGoal!.id ? updatedGoal! : g))
+      );
+    }
   };
 
   return (
     <NewSavingContext.Provider
-      value={{ goals, addSavingsGoal, addPayment, loading }}
+      value={{ goals, mainGoal, addSavingsGoal, addPayment, loading }}
     >
       {children}
     </NewSavingContext.Provider>

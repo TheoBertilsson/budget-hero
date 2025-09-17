@@ -156,8 +156,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           }
         : { incomes: null, expenses: [expense] }
     );
-
-    addPayment(year, month, savings);
   };
 
   return (

@@ -19,6 +19,7 @@ export default function SetupGoalCard() {
   const { year, month } = useDate();
   const { addSavingsGoal, loading } = useNewSavingsGoal();
   const [yearsOfSaving, setYearsOfSaving] = useState(3);
+  const [goalName, setGoalName] = useState("");
   const [savingsGoalState, setSavingsGoalState] = useState(0);
   const calculatedMonthlySavingsGoal = Math.ceil(
     savingsGoalState / (yearsOfSaving * 12)
@@ -33,6 +34,7 @@ export default function SetupGoalCard() {
       if (noDeadline) {
         addSavingsGoal({
           goal: savingsGoalState,
+          name: goalName,
           type: "main",
           hasDeadline: false,
           monthlyGoal: monthlySavingsGoal,
@@ -40,6 +42,7 @@ export default function SetupGoalCard() {
       } else {
         addSavingsGoal({
           goal: savingsGoalState,
+          name: goalName,
           type: "main",
           hasDeadline: true,
           timeInMonths: yearsOfSaving * 12,
@@ -72,6 +75,18 @@ export default function SetupGoalCard() {
                 min={0}
                 name="savingsGoal"
                 placeholder="1 000 000"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="goalName">Name</Label>
+              <Input
+                id="goalName"
+                type="text"
+                onChange={(value) => setGoalName(value.currentTarget.value)}
+                min={0}
+                name="goalName"
+                placeholder="New House"
                 required
               />
             </div>

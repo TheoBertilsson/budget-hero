@@ -66,6 +66,7 @@ export type MonthlySavings = {
 
 export type NewSavingGoalType = {
   id: string;
+  name: string;
   type: "main" | "sub";
   total: number;
   goal: number;
@@ -75,19 +76,21 @@ export type NewSavingGoalType = {
 };
 export type NewSavingGoalContextType = {
   goals: NewSavingGoalType[];
-  addSavingsGoal: (params: AddSavingsGoalParams) => void;
+  mainGoal: NewSavingGoalType | null;
+  addSavingsGoal: (params: AddSavingsGoalParams) => Promise<void>;
   addPayment: (
     goalId: string,
     year: string,
     month: string,
     amount: number
-  ) => void;
+  ) => Promise<void>;
   loading: boolean;
 };
 
 export type AddSavingsGoalParams =
   | {
       goal: number;
+      name: string;
       type: "main" | "sub";
       hasDeadline: true;
       timeInMonths: number;
@@ -95,6 +98,7 @@ export type AddSavingsGoalParams =
     }
   | {
       goal: number;
+      name: string;
       type: "main" | "sub";
       hasDeadline: false;
       timeInMonths?: never;
