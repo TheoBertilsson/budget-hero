@@ -9,15 +9,13 @@ import {
 import { Label } from "@radix-ui/react-label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Slider } from "./ui/slider";
-import { useDate } from "@/lib/stores/DateContext";
 import { Checkbox } from "./ui/checkbox";
-import { useNewSavingsGoal } from "@/lib/stores/NewSavingsGoal";
+import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 
 export default function SetupGoalCard() {
-  const { year, month } = useDate();
-  const { addSavingsGoal, loading } = useNewSavingsGoal();
+  const { addSavingsGoal, loading } = useSavingsGoal();
   const [yearsOfSaving, setYearsOfSaving] = useState(3);
   const [goalName, setGoalName] = useState("");
   const [savingsGoalState, setSavingsGoalState] = useState(0);

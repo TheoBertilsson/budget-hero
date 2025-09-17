@@ -1,7 +1,7 @@
 import { useFinance } from "@/lib/stores/FinanceContext";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import {
   Drawer,
   DrawerClose,
@@ -14,25 +14,12 @@ import {
 } from "./ui/drawer";
 import { Input } from "./ui/input";
 import { Label } from "@radix-ui/react-label";
-import { Popover } from "./ui/popover";
-import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "./ui/command";
-import { useSavingsGoal } from "@/lib/stores/SavingsGoalContext";
 import { Progress } from "./ui/progress";
 import { ChartRadialStacked } from "./ui/radialProgress";
 import { auth } from "@/lib/firebase";
 import { useDate } from "@/lib/stores/DateContext";
 import ConfettiExplosion from "react-confetti-explosion";
-import { useNewSavingsGoal } from "@/lib/stores/NewSavingsGoal";
+import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { CategoryBox, GoalBox } from "./ComboBoxes";
 
 export function SummaryCard() {
@@ -85,7 +72,7 @@ export function BudgetCard() {
 }
 
 export function MonthlySavingProgress() {
-  const { mainGoal } = useNewSavingsGoal();
+  const { mainGoal } = useSavingsGoal();
   const { year, month } = useDate();
 
   const thisMonthSavings = mainGoal?.monthly?.[year]?.[month]?.paid ?? 0;
@@ -133,7 +120,7 @@ export function MonthlySavingProgress() {
 }
 
 export function TotalSavingsGoal() {
-  const { mainGoal } = useNewSavingsGoal();
+  const { mainGoal } = useSavingsGoal();
 
   const totalProgress = mainGoal?.goal
     ? Math.ceil((mainGoal.total / mainGoal.goal) * 100)
@@ -366,7 +353,7 @@ function AddIncomeDrawer() {
 
 function AddSavingDrawer() {
   const { addSavings } = useFinance();
-  const { addPayment } = useNewSavingsGoal();
+  const { addPayment } = useSavingsGoal();
   const { year, month } = useDate();
   const [price, setPrice] = useState(0);
   const [goal, setGoal] = useState<{ value: string; label: string }>();

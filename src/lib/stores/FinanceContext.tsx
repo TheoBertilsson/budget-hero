@@ -10,7 +10,6 @@ import { Expense, FinanceContextType, MonthlyFinance, Payment } from "../types";
 import { auth, db } from "../firebase";
 import { arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
 import { useDate } from "./DateContext";
-import { useSavingsGoal } from "./SavingsGoalContext";
 
 const FinanceContext = createContext<FinanceContextType>({
   finance: null,
@@ -24,7 +23,6 @@ const FinanceContext = createContext<FinanceContextType>({
 export function FinanceProvider({ children }: { children: ReactNode }) {
   const [finance, setFinanceState] = useState<MonthlyFinance | null>(null);
   const [loading, setLoading] = useState(true);
-  const { addPayment } = useSavingsGoal();
 
   const { year, month } = useDate();
 

@@ -1,6 +1,5 @@
 "use client";
 import ProtectedRoute from "../../components/ProtectedRoute";
-import FirstSetupCard from "@/components/FirstSetupCard";
 import { FinanceProvider } from "@/lib/stores/FinanceContext";
 import {
   BudgetCard,
@@ -8,16 +7,12 @@ import {
   SummaryCard,
   TotalSavingsGoal,
 } from "@/components/Dashboard";
-import { SavingsProvider } from "@/lib/stores/SavingsGoalContext";
 import MonthSlider from "@/components/Carousel";
-import {
-  NewSavingProvider,
-  useNewSavingsGoal,
-} from "@/lib/stores/NewSavingsGoal";
+import { SavingsProvider, useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import SetupGoalCard from "@/components/Goals";
 
 function DashboardContent() {
-  const { goals } = useNewSavingsGoal();
+  const { goals } = useSavingsGoal();
 
   return (
     <>
@@ -45,13 +40,11 @@ function DashboardContent() {
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <NewSavingProvider>
-        <SavingsProvider>
-          <FinanceProvider>
-            <DashboardContent />
-          </FinanceProvider>
-        </SavingsProvider>
-      </NewSavingProvider>
+      <SavingsProvider>
+        <FinanceProvider>
+          <DashboardContent />
+        </FinanceProvider>
+      </SavingsProvider>
     </ProtectedRoute>
   );
 }

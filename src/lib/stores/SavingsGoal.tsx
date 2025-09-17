@@ -9,8 +9,8 @@ import {
 } from "react";
 import {
   AddSavingsGoalParams,
-  NewSavingGoalContextType,
-  NewSavingGoalType,
+  SavingGoalContextType,
+  SavingGoalType,
 } from "../types";
 import { useDate } from "./DateContext";
 import { auth, db } from "../firebase";
@@ -23,13 +23,13 @@ import {
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 
-const NewSavingContext = createContext<NewSavingGoalContextType | undefined>(
+const SavingContext = createContext<SavingGoalContextType | undefined>(
   undefined
 );
 
-export function NewSavingProvider({ children }: { children: ReactNode }) {
+export function SavingsProvider({ children }: { children: ReactNode }) {
   const { year, month } = useDate();
-  const [goals, setGoals] = useState<NewSavingGoalType[]>([]);
+  const [goals, setGoals] = useState<SavingGoalType[]>([]);
   const mainGoal = goals.find((goal) => goal.type === "main") || null;
   const [loading, setLoading] = useState(true);
 
@@ -70,7 +70,7 @@ export function NewSavingProvider({ children }: { children: ReactNode }) {
     const savingGoalsRef = doc(db, "users", user.uid, "finance", "savingGoals");
     const snap = await getDoc(savingGoalsRef);
     const data = snap.exists() ? snap.data() : { goals: [] };
-    const goals: NewSavingGoalType[] = data.goals || [];
+    const goals: SavingGoalType[] = data.goals || [];
 
     // If adding a new main goal, downgrade any existing main goal to sub
     if (params.type === "main") {
@@ -85,7 +85,7 @@ export function NewSavingProvider({ children }: { children: ReactNode }) {
         ? Math.ceil(params.goal / params.monthlyGoal)
         : params.timeInMonths || 0;
 
-    const newGoal: NewSavingGoalType = {
+    const newGoal: SavingGoalType = {
       id: newGoalId,
       type: params.type,
       total: 0,
@@ -124,14 +124,14 @@ export function NewSavingProvider({ children }: { children: ReactNode }) {
 
     const savingGoalRef = doc(db, "users", user.uid, "finance", "savingGoals");
 
-    let updatedGoal: NewSavingGoalType | null = null;
+    let updatedGoal: SavingGoalType | null = null;
 
     await runTransaction(db, async (tx) => {
       const snap = await tx.get(savingGoalRef);
       if (!snap.exists()) throw new Error("Saving goals document not found");
 
       const data = snap.data();
-      const goals: NewSavingGoalType[] = data.goals || [];
+      const goals: SavingGoalType[] = data.goals || [];
 
       const goalIndex = goals.findIndex((g) => g.id === goalId);
       if (goalIndex === -1) throw new Error("Goal not found");
@@ -194,15 +194,15 @@ export function NewSavingProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <NewSavingContext.Provider
+    <SavingContext.Provider
       value={{ goals, mainGoal, addSavingsGoal, addPayment, loading }}
     >
       {children}
-    </NewSavingContext.Provider>
+    </SavingContext.Provider>
   );
 }
-export function useNewSavingsGoal() {
-  const ctx = useContext(NewSavingContext);
+export function useSavingsGoal() {
+  const ctx = useContext(SavingContext);
   if (!ctx)
     throw new Error("useSavingsGoal must be used within a SavingsProvider");
   return ctx;

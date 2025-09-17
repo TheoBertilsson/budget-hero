@@ -12,7 +12,7 @@ import {
 } from "./ui/command";
 import { cn } from "@/lib/utils";
 
-import { useNewSavingsGoal } from "@/lib/stores/NewSavingsGoal";
+import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 
 const categories = [
   {
@@ -117,7 +117,7 @@ export function GoalBox({
   ) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const { goals } = useNewSavingsGoal();
+  const { goals } = useSavingsGoal();
 
   const goalsMap = goals.map((goal) => {
     return { value: goal.id, label: goal.name };

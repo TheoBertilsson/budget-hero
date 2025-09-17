@@ -34,26 +34,6 @@ export type DateContextType = {
   setYear: (year: string) => void;
   setMonth: (month: string) => void;
 };
-export type SavingsGoalContextType = {
-  savingsGoal: number | null;
-  monthlySavingsGoal: MonthlySavings | null;
-  totalSavings: number;
-  setSavingsGoal: (goal: number) => void;
-  setMonthlySavingsGoal: (
-    totalGoal: number,
-    numberOfMonths: number,
-    startYear: number,
-    startMonth: number
-  ) => void;
-  setTotalSavings: (price: number) => void;
-  addPayment: (year: string, month: string, savings: Payment) => void;
-  loading: boolean;
-};
-export type SavingsGoalType = {
-  goal: number | null;
-  monthly: MonthlySavings | null;
-  total: number | null;
-};
 
 export type MonthlySavings = {
   [year: string]: {
@@ -64,7 +44,7 @@ export type MonthlySavings = {
   };
 };
 
-export type NewSavingGoalType = {
+export type SavingGoalType = {
   id: string;
   name: string;
   type: "main" | "sub";
@@ -74,9 +54,9 @@ export type NewSavingGoalType = {
   hasDeadline: boolean;
   monthly: MonthlySavings;
 };
-export type NewSavingGoalContextType = {
-  goals: NewSavingGoalType[];
-  mainGoal: NewSavingGoalType | null;
+export type SavingGoalContextType = {
+  goals: SavingGoalType[];
+  mainGoal: SavingGoalType | null;
   addSavingsGoal: (params: AddSavingsGoalParams) => Promise<void>;
   addPayment: (
     goalId: string,
