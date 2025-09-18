@@ -24,6 +24,8 @@ import { CategoryBox, GoalBox } from "./ComboBoxes";
 import { capitalize, cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
+import { EllipsisVerticalIcon } from "lucide-react";
+import { EditPopover } from "./EditPopover";
 
 export function SummaryCard() {
   const { incomeTotal, expenseTotal, savingsTotal } = useFinance();
@@ -222,7 +224,16 @@ export function ExpenseBox() {
                   <p className="text-primary/60">
                     {capitalize(expense.category)}
                   </p>
-                  <p>{expense.price.toLocaleString()}</p>
+                  <div className="flex gap-1 items-center">
+                    <p>{expense.price.toLocaleString()}</p>
+                    <EditPopover
+                      type="expense"
+                      price={expense.price}
+                      name={expense.name}
+                      category={expense.category}
+                      index={i}
+                    />
+                  </div>
                 </div>
               );
             })}
@@ -259,7 +270,15 @@ export function IncomeBox() {
                     key={i}
                   >
                     <p>{capitalize(income.name)}</p>
-                    <p>{income.price.toLocaleString()}</p>
+                    <div className="flex gap-1 items-center">
+                      <p>{income.price.toLocaleString()}</p>
+                      <EditPopover
+                        type="income"
+                        price={income.price}
+                        name={income.name}
+                        index={i}
+                      />
+                    </div>
                   </div>
                 );
               })}
@@ -297,7 +316,15 @@ export function SavingsBox() {
                     key={i}
                   >
                     <p>{capitalize(save.goal)}</p>
-                    <p>{save.price.toLocaleString()}</p>
+                    <div className="flex gap-1 items-center">
+                      <p>{save.price.toLocaleString()}</p>
+                      <EditPopover
+                        type="save"
+                        price={save.price}
+                        name={save.goal}
+                        index={i}
+                      />
+                    </div>
                   </div>
                 );
               })}

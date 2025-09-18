@@ -49,8 +49,8 @@ export function CategoryBox({
 }: {
   value: string;
   setValue: (value: string) => void;
-  error: boolean;
-  setError: (error: boolean) => void;
+  error?: boolean;
+  setError?: (error: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -62,7 +62,7 @@ export function CategoryBox({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-[200px] justify-between",
+            "w-[11.58375rem] justify-between",
             error ? "border border-destructive" : ""
           )}
         >
@@ -84,7 +84,7 @@ export function CategoryBox({
                   value={category.value}
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue);
-                    setError(false);
+                    if (setError) setError(false);
                     setOpen(false);
                   }}
                 >

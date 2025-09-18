@@ -37,6 +37,9 @@ export type FinanceContextType = {
   addExpense: (expense: Expense) => Promise<void>;
   addIncome: (income: Payment) => Promise<void>;
   addSavings: (year: string, month: string, savings: Saving) => Promise<void>;
+  removeExpense: (index: number) => Promise<void>;
+  removeIncome: (index: number) => Promise<void>;
+  removeSave: (index: number) => Promise<void>;
 };
 
 export type DateContextType = {
