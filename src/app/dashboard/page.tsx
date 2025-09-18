@@ -2,7 +2,6 @@
 import ProtectedRoute from "../../components/ProtectedRoute";
 import { FinanceProvider } from "@/lib/stores/FinanceContext";
 import {
-  BudgetCard,
   ExpenseBox,
   IncomeBox,
   MonthlySavingProgress,
