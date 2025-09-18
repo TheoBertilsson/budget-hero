@@ -90,6 +90,9 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       for (const docSnap of querySnap.docs) {
         await updateDoc(docSnap.ref, { type: "sub" });
       }
+      setGoals((prev) =>
+        prev.map((g) => (g.type === "main" ? { ...g, type: "sub" } : g))
+      );
     }
 
     const calculatedTime =
@@ -119,6 +122,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       Number(year),
       Number(month)
     );
+
     setLoading(false);
   };
 
