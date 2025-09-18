@@ -6,7 +6,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Expense, FinanceContextType, MonthlyFinance, Payment } from "../types";
+import {
+  Expense,
+  FinanceContextType,
+  MonthlyFinance,
+  Payment,
+  Saving,
+} from "../types";
 import { auth, db } from "../firebase";
 import { arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
 import { useDate } from "./DateContext";
@@ -15,8 +21,10 @@ const FinanceContext = createContext<FinanceContextType>({
   finance: null,
   incomes: [],
   expenses: [],
+  savings: [],
   incomeTotal: 0,
   expenseTotal: 0,
+  savingsTotal: 0,
   loading: true,
   setFinance: async () => {},
   addExpense: async () => {},
@@ -29,10 +37,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const incomes = finance?.incomes || [];
   const expenses = finance?.expenses || [];
+  const savings = finance?.savings || [];
   const incomeTotal =
-    finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+    finance?.incomes?.reduce((sum, curr) => sum + curr.price, 0) || 0;
   const expenseTotal =
-    finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
+    finance?.expenses?.reduce((sum, curr) => sum + curr.price, 0) || 0;
+  const savingsTotal =
+    finance?.savings?.reduce((sum, curr) => sum + curr.price, 0) || 0;
 
   const { year, month } = useDate();
 
@@ -57,7 +68,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       if (snap.exists()) {
         setFinanceState(snap.data() as MonthlyFinance);
       } else {
-        setFinanceState({ incomes: [], expenses: [] }); // default if doc missing
+        setFinanceState({ incomes: [], expenses: [], savings: [] });
       }
 
       setLoading(false);
@@ -107,8 +118,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             expenses: prev.expenses ? [...prev.expenses, expense] : [expense],
           }
         : {
-            incomes: null,
+            incomes: [],
             expenses: [expense],
+            savings: [],
           }
     );
   };
@@ -135,11 +147,12 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           }
         : {
             incomes: [income],
-            expenses: null,
+            expenses: [],
+            savings: [],
           }
     );
   };
-  const addSavings = async (year: string, month: string, savings: Payment) => {
+  const addSavings = async (year: string, month: string, saving: Saving) => {
     const user = auth.currentUser;
     if (!user) throw new Error("No user signed in");
     const financeRef = doc(
@@ -150,19 +163,19 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       `${year}-${month}`
     );
 
-    const expense = { ...savings, category: "Savings" };
-    await setDoc(
-      financeRef,
-      { expenses: arrayUnion(expense) },
-      { merge: true }
-    );
+    await setDoc(financeRef, { savings: arrayUnion(saving) }, { merge: true });
+
     setFinanceState((prev) =>
       prev
         ? {
             ...prev,
-            expenses: prev.expenses ? [...prev.expenses, expense] : [expense],
+            savings: prev.savings ? [...prev.savings, saving] : [saving],
           }
-        : { incomes: null, expenses: [expense] }
+        : {
+            incomes: [],
+            expenses: [],
+            savings: [saving],
+          }
     );
   };
 
@@ -172,8 +185,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         finance,
         incomes,
         expenses,
+        savings,
         incomeTotal,
         expenseTotal,
+        savingsTotal,
         loading,
         setFinance,
         addExpense,

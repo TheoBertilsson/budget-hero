@@ -191,7 +191,7 @@ export function SetupNewGoal({
   }
   return (
     <>
-      <div className="absolute h-svh w-dvw flex justify-center items-center bg-primary/80 z-50">
+      <div className="absolute min-h-svh min-w-dvw h-full w-full flex justify-center items-center bg-primary/80 z-50">
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CardTitle className="text-2xl font-bold flex justify-between items-center">

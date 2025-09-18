@@ -12,21 +12,27 @@ import {
 export function ChartRadialStacked({
   expenses,
   income,
+  savings,
 }: {
   expenses: number;
   income: number;
+  savings: number;
 }) {
-  const totalLeft = income - expenses;
-  const chartData = [{ expenses: expenses, income: income }];
+  const totalLeft = income - expenses - savings;
+  const chartData = [{ expenses, income, savings }];
 
   const chartConfig = {
     expenses: {
       label: "Expenses",
       color: "var(--chart-1)",
     },
+    savings: {
+      label: "Savings",
+      color: "var(--chart-2)",
+    },
     income: {
       label: "Income",
-      color: "var(--chart-2)",
+      color: "var(--chart-3)",
     },
   } satisfies ChartConfig;
   return (
@@ -76,6 +82,14 @@ export function ChartRadialStacked({
           stackId="a"
           cornerRadius={5}
           fill="var(--color-expenses)"
+          className="stroke-transparent stroke-2"
+          isAnimationActive={true}
+        />
+        <RadialBar
+          dataKey="savings"
+          stackId="a"
+          cornerRadius={5}
+          fill="var(--color-savings)"
           className="stroke-transparent stroke-2"
           isAnimationActive={true}
         />

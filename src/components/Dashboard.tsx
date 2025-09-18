@@ -24,7 +24,7 @@ import { CategoryBox, GoalBox } from "./ComboBoxes";
 import { cn } from "@/lib/utils";
 
 export function SummaryCard() {
-  const { incomeTotal, expenseTotal } = useFinance();
+  const { incomeTotal, expenseTotal, savingsTotal } = useFinance();
 
   return (
     <>
@@ -32,8 +32,9 @@ export function SummaryCard() {
         <CardContent className="flex flex-col gap-2 w-full h-full ">
           <div className="flex items-center justify-center">
             <ChartRadialStacked
-              expenses={expenseTotal || 0}
-              income={incomeTotal || 0}
+              expenses={expenseTotal}
+              income={incomeTotal}
+              savings={savingsTotal}
             />
           </div>
         </CardContent>
@@ -72,34 +73,36 @@ export function MonthlySavingProgress() {
   return (
     <>
       <Card className="w-full my-auto h-full">
-        <CardContent className="flex flex-col gap-5 pb-2 justify-center  h-full ">
-          <div className=" flex gap-2 flex-col">
-            <div className="flex justify-end text-sm font-semibold">
-              <p>{goalThisMonth?.toLocaleString()}</p>
+        <CardContent className="flex flex-col gap-5 px-0 justify-center  h-full py-0">
+          <div className="flex flex-col gap-1 justify-center  h-full  px-4">
+            <div className=" flex gap-2 flex-col">
+              <div className="flex justify-end text-sm font-semibold">
+                <p>{goalThisMonth?.toLocaleString()}</p>
+              </div>
+              <div className="flex flex-col justify-center items-center">
+                <Progress
+                  value={monthlyProgress > 100 ? 100 : monthlyProgress}
+                  className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-cyan-400 [&>div]:via-sky-500 [&>div]:to-indigo-500 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
+                  id="monthlyProgress"
+                />
+                {monthlyProgress >= 100 && (
+                  <ConfettiExplosion className="" duration={5000} />
+                )}
+              </div>
             </div>
-            <div className="flex flex-col justify-center items-center">
-              <Progress
-                value={monthlyProgress > 100 ? 100 : monthlyProgress}
-                className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-cyan-400 [&>div]:via-sky-500 [&>div]:to-indigo-500 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
-                id="monthlyProgress"
-              />
-              {monthlyProgress >= 100 && (
-                <ConfettiExplosion className="" duration={5000} />
-              )}
-            </div>
-          </div>
 
-          <p className="text-sm leading-6">
-            This month you have saved{" "}
-            <span className="font-bold">
-              {thisMonthSavings?.toLocaleString() || 0}
-            </span>{" "}
-            SEK!
-            <br /> That is <span className="font-bold">
-              {monthlyProgress}%
-            </span>{" "}
-            of your monthly goal!
-          </p>
+            <p className="text-sm">
+              This month you have saved{" "}
+              <span className="font-bold">
+                {thisMonthSavings?.toLocaleString() || 0}
+              </span>{" "}
+              SEK!
+              <br /> That is{" "}
+              <span className="font-bold">{monthlyProgress}%</span> of your
+              monthly goal!
+            </p>
+          </div>
+          <SavingsBox />
         </CardContent>
       </Card>
     </>
@@ -155,7 +158,7 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
     <>
       <Card className="flex flex-col h-full justify-between items-center">
         {subGoals.length ? (
-          <CardContent className="flex flex-col py-2 gap-4 max-h-80 overflow-auto w-full">
+          <CardContent className="flex flex-col py-2 gap-4 max-h-[34.375rem] overflow-auto w-full">
             {subGoals.map((goal, i) => {
               const progress = goal.goal
                 ? Math.ceil((goal.total / goal.goal) * 100)
@@ -203,7 +206,7 @@ export function IncomeBox() {
   return (
     <>
       <Card className="flex flex-col h-full justify-between items-center">
-        {incomes.length ? (
+        {incomes.length > 0 ? (
           <CardContent className="flex flex-col py-2 gap-4 max-h-40 overflow-auto w-full">
             {incomes.map((income, i) => {
               return (
@@ -211,8 +214,8 @@ export function IncomeBox() {
                   className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
                   key={i}
                 >
-                  <p>{income.item.toLocaleString()}</p>
-                  <p>{income.cost.toLocaleString()}</p>
+                  <p>{income.name}</p>
+                  <p>{income.price.toLocaleString()}</p>
                 </div>
               );
             })}
@@ -232,6 +235,42 @@ export function IncomeBox() {
     </>
   );
 }
+
+export function SavingsBox() {
+  const { savings } = useFinance();
+
+  return (
+    <>
+      <Card className="flex flex-col h-full justify-end items-center border-none shadow-none p-0">
+        {savings.length ? (
+          <CardContent className="flex flex-col gap-4 max-h-20 overflow-auto w-full">
+            {savings.map((save, i) => {
+              return (
+                <div
+                  className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
+                  key={i}
+                >
+                  <p>{save.goal}</p>
+                  <p>{save.price.toLocaleString()}</p>
+                </div>
+              );
+            })}
+          </CardContent>
+        ) : (
+          <>
+            <CardContent className="flex justify-center items-center text-primary/60">
+              <p>No savings yet</p>
+            </CardContent>
+          </>
+        )}
+        <CardFooter className="flex justify-end w-full items-end ">
+          <AddSavingDrawer />
+        </CardFooter>
+      </Card>
+    </>
+  );
+}
+
 export function AddExpenseDrawer() {
   const { addExpense, incomeTotal, expenseTotal } = useFinance();
   const [price, setPrice] = useState(0);
@@ -255,7 +294,7 @@ export function AddExpenseDrawer() {
       return;
     }
 
-    await addExpense({ item: name, cost: price, category: category });
+    await addExpense({ name, price, category });
 
     setLoading(false);
 
@@ -373,7 +412,7 @@ function AddIncomeDrawer() {
 
     setLoading(true);
 
-    await addIncome({ item: name, cost: price });
+    await addIncome({ name, price });
 
     setLoading(false);
 
@@ -473,7 +512,7 @@ function AddSavingDrawer() {
     }
     setLoading(true);
 
-    await addSavings(year, month, { item: goal?.label || "", cost: price });
+    await addSavings(year, month, { goal: goal.label, price });
     await addPayment(goal?.value, year, month, price);
     setLoading(false);
 
@@ -486,7 +525,7 @@ function AddSavingDrawer() {
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button
-          className="bg-blue-500 hover:bg-blue-500/90 font-bold"
+          className="bg-blue-500 hover:bg-blue-500/90 font-bold h-8"
           disabled={moneyLeft <= 0}
         >
           Add Savings
