@@ -15,13 +15,18 @@ import {
 import { useDate } from "./DateContext";
 import { auth, db } from "../firebase";
 import {
+  addDoc,
   arrayUnion,
+  collection,
   doc,
   getDoc,
+  getDocs,
+  query,
   runTransaction,
   setDoc,
+  updateDoc,
+  where,
 } from "firebase/firestore";
-import { v4 as uuidv4 } from "uuid";
 
 const SavingContext = createContext<SavingGoalContextType | undefined>(
   undefined
@@ -41,13 +46,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const savingGoalRef = doc(
-        db,
-        "users",
-        user.uid,
-        "finance",
-        "savingGoals"
-      );
+      const savingGoalRef = doc(db, "users", user.uid, "finance", "savings");
       const snap = await getDoc(savingGoalRef);
 
       if (snap.exists()) {
@@ -67,26 +66,31 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
     setLoading(true);
 
-    const savingGoalsRef = doc(db, "users", user.uid, "finance", "savingGoals");
-    const snap = await getDoc(savingGoalsRef);
-    const data = snap.exists() ? snap.data() : { goals: [] };
-    const goals: SavingGoalType[] = data.goals || [];
+    const savingsCollection = collection(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      "savings",
+      "goals"
+    );
 
-    // If adding a new main goal, downgrade any existing main goal to sub
     if (params.type === "main") {
-      goals.forEach((g) => {
-        if (g.type === "main") g.type = "sub";
-      });
+      const q = query(savingsCollection, where("type", "==", "main"));
+      const querySnap = await getDocs(q);
+
+      for (const docSnap of querySnap.docs) {
+        await updateDoc(docSnap.ref, { type: "sub" });
+      }
     }
 
-    const newGoalId = uuidv4();
     const calculatedTime =
       !params.timeInMonths && params.monthlyGoal
         ? Math.ceil(params.goal / params.monthlyGoal)
         : params.timeInMonths || 0;
 
     const newGoal: SavingGoalType = {
-      id: newGoalId,
+      id: "",
       type: params.type,
       total: 0,
       goal: params.goal,
@@ -96,15 +100,12 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       monthly: {},
     };
 
-    await setDoc(
-      savingGoalsRef,
-      { ...goals, goals: arrayUnion(newGoal) },
-      { merge: true }
-    );
+    const docRef = await addDoc(savingsCollection, newGoal);
+    await setDoc(docRef, { id: docRef.id }, { merge: true });
 
-    setGoals((prev) => [...prev, newGoal]);
+    setGoals((prev) => [...prev, { ...newGoal, id: docRef.id }]);
     await setMonthlySavingsGoal(
-      newGoalId,
+      docRef.id,
       params.goal,
       calculatedTime,
       Number(year),
@@ -122,25 +123,28 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     const user = auth.currentUser;
     if (!user) throw new Error("No user signed in");
 
-    const savingGoalRef = doc(db, "users", user.uid, "finance", "savingGoals");
+    const savingGoalRef = doc(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      "savings",
+      "goals",
+      goalId
+    );
 
     let updatedGoal: SavingGoalType | null = null;
 
     await runTransaction(db, async (tx) => {
       const snap = await tx.get(savingGoalRef);
-      if (!snap.exists()) throw new Error("Saving goals document not found");
+      if (!snap.exists()) throw new Error("Saving goal not found");
 
-      const data = snap.data();
-      const goals: SavingGoalType[] = data.goals || [];
-
-      const goalIndex = goals.findIndex((g) => g.id === goalId);
-      if (goalIndex === -1) throw new Error("Goal not found");
-
-      const goal = { ...goals[goalIndex] };
+      const goal = snap.data() as SavingGoalType;
 
       if (!goal.monthly[year]) goal.monthly[year] = {};
-      if (!goal.monthly[year][month])
+      if (!goal.monthly[year][month]) {
         goal.monthly[year][month] = { goal: goal.goal, paid: 0 };
+      }
 
       goal.monthly[year][month].paid += amount;
       goal.total += amount;
@@ -178,18 +182,12 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      const updatedGoals = [...goals];
-      updatedGoals[goalIndex] = goal;
-
-      tx.set(savingGoalRef, { goals: updatedGoals }, { merge: true });
-
+      tx.set(savingGoalRef, goal, { merge: true });
       updatedGoal = goal;
     });
 
     if (updatedGoal) {
-      setGoals((prev) =>
-        prev.map((g) => (g.id === updatedGoal!.id ? updatedGoal! : g))
-      );
+      setGoals((prev) => prev.map((g) => (g.id === goalId ? updatedGoal! : g)));
     }
   };
 
@@ -203,16 +201,20 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     const user = auth.currentUser;
     if (!user) throw new Error("No user signed in");
 
-    const savingGoalsRef = doc(db, "users", user.uid, "finance", "savingGoals");
-    const snap = await getDoc(savingGoalsRef);
+    const savingGoalRef = doc(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      "savings",
+      "goals",
+      goalId
+    );
+    const snap = await getDoc(savingGoalRef);
 
     if (!snap.exists()) throw new Error("Saving goals document does not exist");
 
-    const data = snap.data();
-    const goals: SavingGoalType[] = data.goals || [];
-
-    const goalIndex = goals.findIndex((g) => g.id === goalId);
-    if (goalIndex === -1) throw new Error("Goal not found");
+    const goal = snap.data() as SavingGoalType;
 
     const newMonthlySavings: (typeof goals)[number]["monthly"] = {};
     let remainingGoal = totalGoal;
@@ -239,20 +241,16 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     }
 
     // Update the goal in the array
-    const updatedGoals = [...goals];
-
-    updatedGoals[goalIndex] = {
-      ...updatedGoals[goalIndex],
+    const updatedGoal = {
+      ...goal,
       monthly: newMonthlySavings,
     };
 
-    setGoals((prev) =>
-      prev.map((g) =>
-        g.id === updatedGoals[goalIndex].id ? updatedGoals[goalIndex] : g
-      )
-    );
+    await setDoc(savingGoalRef, updatedGoal, { merge: true });
 
-    await setDoc(savingGoalsRef, { goals: updatedGoals }, { merge: true });
+    setGoals((prev) =>
+      prev.map((g) => (g.id === goalId ? { ...updatedGoal, id: goalId } : g))
+    );
   };
 
   return (
