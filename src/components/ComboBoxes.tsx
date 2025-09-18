@@ -115,6 +115,7 @@ export function GoalBox({
     | {
         value: string;
         label: string;
+        id: string;
       }
     | undefined;
   setSelectedOption: (
@@ -122,6 +123,7 @@ export function GoalBox({
       | {
           value: string;
           label: string;
+          id: string;
         }
       | undefined
   ) => void;
@@ -132,7 +134,7 @@ export function GoalBox({
   const { goals } = useSavingsGoal();
 
   const goalsMap = goals.map((goal) => {
-    return { value: goal.id, label: goal.name };
+    return { value: goal.id, label: goal.name, id: goal.id };
   });
 
   return (

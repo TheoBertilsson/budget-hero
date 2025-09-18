@@ -35,7 +35,7 @@ const SavingContext = createContext<SavingGoalContextType | undefined>(
 
 export function SavingsProvider({ children }: { children: ReactNode }) {
   const { year, month } = useDate();
-  const [goals, setGoals] = useState<SavingGoalType[]>([]);
+  const [goals, setGoalsState] = useState<SavingGoalType[]>([]);
   const mainGoal = goals.find((goal) => goal.type === "main") || null;
   const subGoals = goals.filter((goal) => goal.type === "sub");
   const [loading, setLoading] = useState(true);
@@ -64,7 +64,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
         id: docSnap.id,
       }));
 
-      setGoals(allGoals);
+      setGoalsState(allGoals);
       setLoading(false);
     };
     fetchSavings();
@@ -93,7 +93,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       for (const docSnap of querySnap.docs) {
         await updateDoc(docSnap.ref, { type: "sub" });
       }
-      setGoals((prev) =>
+      setGoalsState((prev) =>
         prev.map((g) => (g.type === "main" ? { ...g, type: "sub" } : g))
       );
     }
@@ -117,7 +117,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     const docRef = await addDoc(savingsCollection, newGoal);
     await setDoc(docRef, { id: docRef.id }, { merge: true });
 
-    setGoals((prev) => [...prev, { ...newGoal, id: docRef.id }]);
+    setGoalsState((prev) => [...prev, { ...newGoal, id: docRef.id }]);
     await setMonthlySavingsGoal(
       docRef.id,
       params.goal,
@@ -203,7 +203,9 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     });
 
     if (updatedGoal) {
-      setGoals((prev) => prev.map((g) => (g.id === goalId ? updatedGoal! : g)));
+      setGoalsState((prev) =>
+        prev.map((g) => (g.id === goalId ? updatedGoal! : g))
+      );
     }
   };
 
@@ -265,14 +267,81 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
     await setDoc(savingGoalRef, updatedGoal, { merge: true });
 
-    setGoals((prev) =>
+    setGoalsState((prev) =>
       prev.map((g) => (g.id === goalId ? { ...updatedGoal, id: goalId } : g))
     );
   };
 
+  const updateGoal = async (
+    goal: SavingGoalType,
+    id: string,
+    monthlyGoal?: number
+  ) => {
+    const user = getCurrentUser();
+    if (!user) throw new Error("No user signed in");
+
+    setLoading(true);
+
+    const savingsCollection = collection(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      "savings",
+      "goals"
+    );
+
+    if (goal.type === "main") {
+      const q = query(savingsCollection, where("type", "==", "main"));
+      const querySnap = await getDocs(q);
+
+      for (const docSnap of querySnap.docs) {
+        if (docSnap.id !== id) {
+          await updateDoc(docSnap.ref, { type: "sub" });
+        }
+      }
+
+      setGoalsState((prev) =>
+        prev.map((g) =>
+          g.id !== id && g.type === "main" ? { ...g, type: "sub" } : g
+        )
+      );
+    }
+
+    let calculatedTime = goal.timeInMonths;
+    if (monthlyGoal) {
+      calculatedTime =
+        !goal.timeInMonths && monthlyGoal
+          ? Math.ceil(goal.goal / monthlyGoal)
+          : goal.timeInMonths || 0;
+    }
+
+    const updatedGoal = {
+      ...goal,
+      timeInMonths: calculatedTime,
+    };
+
+    const goalRef = doc(savingsCollection, id);
+    await updateDoc(goalRef, updatedGoal);
+
+    setGoalsState((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, ...updatedGoal } : g))
+    );
+
+    setLoading(false);
+  };
+
   return (
     <SavingContext.Provider
-      value={{ goals, mainGoal, subGoals, addSavingsGoal, addPayment, loading }}
+      value={{
+        goals,
+        mainGoal,
+        subGoals,
+        updateGoal,
+        addSavingsGoal,
+        addPayment,
+        loading,
+      }}
     >
       {children}
     </SavingContext.Provider>

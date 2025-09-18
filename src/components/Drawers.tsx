@@ -264,7 +264,11 @@ export function AddSavingDrawer() {
   const { addPayment } = useSavingsGoal();
   const { year, month } = useDate();
   const [price, setPrice] = useState(0);
-  const [goal, setGoal] = useState<{ value: string; label: string }>();
+  const [goal, setGoal] = useState<{
+    value: string;
+    label: string;
+    id: string;
+  }>();
   const [comboboxError, setComboboxError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -283,12 +287,16 @@ export function AddSavingDrawer() {
     }
     setLoading(true);
 
-    await addSavings(year, month, { goal: goal.label, price });
+    await addSavings(year, month, {
+      goal: goal.label,
+      price,
+      goalId: goal.value,
+    });
     await addPayment(goal?.value, year, month, price);
     setLoading(false);
 
     setPrice(0);
-    setGoal({ label: "", value: "" });
+    setGoal({ label: "", value: "", id: "" });
 
     setOpen(false);
   }

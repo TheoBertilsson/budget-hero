@@ -12,11 +12,14 @@ import {
   MonthlyFinance,
   Income,
   Save,
+  SavingGoalType,
+  MonthlySavings,
 } from "../types";
 import { auth, db } from "../firebase";
 import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { useDate } from "./DateContext";
 import { getCurrentUser } from "../utils";
+import { useSavingsGoal } from "./SavingsGoal";
 
 const FinanceContext = createContext<FinanceContextType>({
   finance: null,
@@ -41,6 +44,8 @@ const FinanceContext = createContext<FinanceContextType>({
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
   const { year, month } = useDate();
+  const { updateGoal, goals } = useSavingsGoal();
+
   const [finance, setFinanceState] = useState<MonthlyFinance | null>(null);
   const [loading, setLoading] = useState(true);
   const incomes = finance?.incomes || [];
@@ -217,17 +222,41 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       "finance",
       `${year}-${month}`
     );
+
     const snap = await getDoc(financeRef);
 
     if (!snap.exists()) throw new Error("Finance document not found");
 
     const data = snap.data() as MonthlyFinance;
-    const savings = data.savings || [];
+    const save = data.savings[index];
 
+    const goal = goals.find((goal) => goal.id === save.goalId);
+    if (!goal) throw new Error("No goal found");
+    const monthlyGoal = goal.monthly[year][month];
+
+    if (!monthlyGoal) throw new Error("Monthly goal not found");
+    const totalPaid = monthlyGoal.paid - save.price;
+
+    const updatedGoal: SavingGoalType = {
+      ...goal,
+      monthly: {
+        ...goal.monthly,
+        [year]: {
+          ...goal.monthly?.[year],
+          [month]: {
+            ...monthlyGoal,
+            paid: totalPaid,
+          },
+        },
+      },
+    };
     const updatedSaves = savings.filter((_, i) => i !== index);
 
     await updateDoc(financeRef, { savings: updatedSaves });
 
+    console.log(monthlyGoal.paid + " snopp " + totalPaid);
+
+    updateGoal(updatedGoal, updatedGoal.id);
     setFinanceState((prev) =>
       prev ? { ...prev, savings: updatedSaves } : prev
     );

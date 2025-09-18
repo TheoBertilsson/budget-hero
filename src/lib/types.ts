@@ -7,6 +7,7 @@ export type MonthlyFinance = {
 export type Save = {
   price: number;
   goal: string;
+  goalId: string;
 };
 export type Expense = {
   name: string;
@@ -75,6 +76,11 @@ export type SavingGoalContextType = {
   goals: SavingGoalType[];
   mainGoal: SavingGoalType | null;
   subGoals: SavingGoalType[];
+  updateGoal: (
+    goal: SavingGoalType,
+    id: string,
+    monthlyGoal?: number
+  ) => Promise<void>;
   addSavingsGoal: (params: AddSavingsGoalParams) => Promise<void>;
   addPayment: (
     goalId: string,
