@@ -23,6 +23,7 @@ import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { CategoryBox, GoalBox } from "./ComboBoxes";
 import { capitalize, cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ScrollArea } from "./ui/scroll-area";
 
 export function SummaryCard() {
   const { incomeTotal, expenseTotal, savingsTotal } = useFinance();
@@ -157,32 +158,34 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
 
   return (
     <>
-      <Card className="flex flex-col h-full justify-between items-center">
+      <Card className="flex flex-col h-fit justify-between items-center">
         {subGoals.length ? (
-          <CardContent className="flex flex-col py-2 gap-4 max-h-[34.375rem] overflow-auto w-full">
-            {subGoals.map((goal, i) => {
-              const progress = goal.goal
-                ? Math.ceil((goal.total / goal.goal) * 100)
-                : 0;
-              return (
-                <div className="flex flex-col gap-1" key={i}>
-                  <div className=" text-xs font-semibold flex justify-between">
-                    <p>{goal.name.toLocaleString()}</p>
-                    <p>{goal.goal.toLocaleString()}</p>
-                  </div>
+          <ScrollArea className="max-h-52 w-full">
+            <CardContent className="flex flex-col py-2 gap-4 max-h-52 w-full">
+              {subGoals.map((goal, i) => {
+                const progress = goal.goal
+                  ? Math.ceil((goal.total / goal.goal) * 100)
+                  : 0;
+                return (
+                  <div className="flex flex-col gap-1" key={i}>
+                    <div className=" text-xs font-semibold flex justify-between">
+                      <p>{goal.name.toLocaleString()}</p>
+                      <p>{goal.goal.toLocaleString()}</p>
+                    </div>
 
-                  <div className="flex justify-center items-center">
-                    <Progress
-                      value={progress > 100 ? 100 : progress}
-                      className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-green-600 [&>div]:to-green-400 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
-                      id="monthlyProgress"
-                    />
-                    {progress >= 100 && <ConfettiExplosion duration={5000} />}
+                    <div className="flex justify-center items-center">
+                      <Progress
+                        value={progress > 100 ? 100 : progress}
+                        className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-green-600 [&>div]:to-green-400 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
+                        id="monthlyProgress"
+                      />
+                      {progress >= 100 && <ConfettiExplosion duration={5000} />}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </CardContent>
+                );
+              })}
+            </CardContent>
+          </ScrollArea>
         ) : (
           <>
             <div></div>
@@ -205,9 +208,9 @@ export function ExpenseBox() {
   const { expenses } = useFinance();
 
   return (
-    <>
-      <Card className="flex flex-col h-full justify-between items-center">
-        {expenses.length > 0 ? (
+    <Card className="flex flex-col h-full justify-between items-center">
+      {expenses.length > 0 ? (
+        <ScrollArea className=" max-h-[31.25rem] w-full">
           <CardContent className="flex flex-col py-2 gap-4  overflow-auto w-full">
             {expenses.map((expense, i) => {
               return (
@@ -224,19 +227,19 @@ export function ExpenseBox() {
               );
             })}
           </CardContent>
-        ) : (
-          <>
-            <div></div>
-            <CardContent className="flex justify-center items-center text-primary/60">
-              <p>No expenses yet</p>
-            </CardContent>
-          </>
-        )}
-        <CardFooter className="flex justify-end w-full items-end ">
-          <AddExpenseDrawer />
-        </CardFooter>
-      </Card>
-    </>
+        </ScrollArea>
+      ) : (
+        <>
+          <div></div>
+          <CardContent className="flex justify-center items-center text-primary/60">
+            <p>No expenses yet</p>
+          </CardContent>
+        </>
+      )}
+      <CardFooter className="flex justify-end w-full items-end ">
+        <AddExpenseDrawer />
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -247,19 +250,21 @@ export function IncomeBox() {
     <>
       <Card className="flex flex-col h-full justify-between items-center">
         {incomes.length > 0 ? (
-          <CardContent className="flex flex-col py-2 gap-4 max-h-40 overflow-auto w-full">
-            {incomes.map((income, i) => {
-              return (
-                <div
-                  className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
-                  key={i}
-                >
-                  <p>{capitalize(income.name)}</p>
-                  <p>{income.price.toLocaleString()}</p>
-                </div>
-              );
-            })}
-          </CardContent>
+          <ScrollArea className="w-full max-h-40">
+            <CardContent className="flex flex-col py-2 gap-4 max-h-40 w-full">
+              {incomes.map((income, i) => {
+                return (
+                  <div
+                    className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
+                    key={i}
+                  >
+                    <p>{capitalize(income.name)}</p>
+                    <p>{income.price.toLocaleString()}</p>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </ScrollArea>
         ) : (
           <>
             <div></div>
@@ -283,19 +288,21 @@ export function SavingsBox() {
     <>
       <Card className="flex flex-col justify-end items-center border-none shadow-none p-0">
         {savings.length ? (
-          <CardContent className="flex flex-col gap-2 max-h-24 overflow-auto w-full">
-            {savings.map((save, i) => {
-              return (
-                <div
-                  className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
-                  key={i}
-                >
-                  <p>{capitalize(save.goal)}</p>
-                  <p>{save.price.toLocaleString()}</p>
-                </div>
-              );
-            })}
-          </CardContent>
+          <ScrollArea className="w-full max-h-24">
+            <CardContent className="flex flex-col gap-2 max-h-24 w-full">
+              {savings.map((save, i) => {
+                return (
+                  <div
+                    className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
+                    key={i}
+                  >
+                    <p>{capitalize(save.goal)}</p>
+                    <p>{save.price.toLocaleString()}</p>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </ScrollArea>
         ) : (
           <>
             <CardContent className="flex justify-center items-center text-primary/60">
