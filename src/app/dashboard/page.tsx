@@ -10,6 +10,7 @@ import {
 import MonthSlider from "@/components/Carousel";
 import { SavingsProvider, useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import SetupGoalCard from "@/components/Goals";
+import { SettingsDialog } from "@/components/SettingsDialog";
 
 function DashboardContent() {
   const { goals } = useSavingsGoal();
@@ -22,6 +23,7 @@ function DashboardContent() {
         </main>
       ) : (
         <main className="w-screen h-screen flex flex-col items-center gap-5 py-5">
+          <SettingsDialog />
           <header className="w-full max-w-3/4 flex flex-col gap-5">
             <MonthSlider />
             <SummaryCard />
