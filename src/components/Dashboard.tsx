@@ -21,7 +21,8 @@ import { useDate } from "@/lib/stores/DateContext";
 import ConfettiExplosion from "react-confetti-explosion";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { CategoryBox, GoalBox } from "./ComboBoxes";
-import { cn } from "@/lib/utils";
+import { capitalize, cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export function SummaryCard() {
   const { incomeTotal, expenseTotal, savingsTotal } = useFinance();
@@ -200,6 +201,45 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
   );
 }
 
+export function ExpenseBox() {
+  const { expenses } = useFinance();
+
+  return (
+    <>
+      <Card className="flex flex-col h-full justify-between items-center">
+        {expenses.length > 0 ? (
+          <CardContent className="flex flex-col py-2 gap-4 max-h-40 overflow-auto w-full">
+            {expenses.map((expense, i) => {
+              return (
+                <div
+                  className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
+                  key={i}
+                >
+                  <p>{capitalize(expense.name)}</p>
+                  <p className="text-primary/60">
+                    {capitalize(expense.category)}
+                  </p>
+                  <p>{expense.price.toLocaleString()}</p>
+                </div>
+              );
+            })}
+          </CardContent>
+        ) : (
+          <>
+            <div></div>
+            <CardContent className="flex justify-center items-center text-primary/60">
+              <p>No expenses yet</p>
+            </CardContent>
+          </>
+        )}
+        <CardFooter className="flex justify-end w-full items-end ">
+          <AddExpenseDrawer />
+        </CardFooter>
+      </Card>
+    </>
+  );
+}
+
 export function IncomeBox() {
   const { incomes } = useFinance();
 
@@ -214,7 +254,7 @@ export function IncomeBox() {
                   className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
                   key={i}
                 >
-                  <p>{income.name}</p>
+                  <p>{capitalize(income.name)}</p>
                   <p>{income.price.toLocaleString()}</p>
                 </div>
               );
@@ -241,7 +281,7 @@ export function SavingsBox() {
 
   return (
     <>
-      <Card className="flex flex-col h-full justify-end items-center border-none shadow-none p-0">
+      <Card className="flex flex-col justify-end items-center border-none shadow-none p-0">
         {savings.length ? (
           <CardContent className="flex flex-col gap-4 max-h-20 overflow-auto w-full">
             {savings.map((save, i) => {
@@ -250,7 +290,7 @@ export function SavingsBox() {
                   className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
                   key={i}
                 >
-                  <p>{save.goal}</p>
+                  <p>{capitalize(save.goal)}</p>
                   <p>{save.price.toLocaleString()}</p>
                 </div>
               );
@@ -281,6 +321,7 @@ export function AddExpenseDrawer() {
   const [comboboxError, setComboboxError] = useState(false);
 
   const moneyLeft = incomeTotal - expenseTotal;
+  console.log(moneyLeft);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -306,11 +347,29 @@ export function AddExpenseDrawer() {
   }
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        <Button variant={"destructive"} disabled={!moneyLeft}>
-          Add Expense
+      {moneyLeft <= 0 ? (
+        <Button
+          variant={"destructive"}
+          className="opacity-50 cursor-not-allowed hover:bg-destructive"
+          onClick={() => {
+            if (moneyLeft <= 0) {
+              toast("No money!", {
+                description: "Add an income before adding a new expense",
+                action: {
+                  label: "Close",
+                  onClick: () => console.log("Close toast"),
+                },
+              });
+            }
+          }}
+        >
+          Spend
         </Button>
-      </DrawerTrigger>
+      ) : (
+        <DrawerTrigger asChild>
+          <Button variant={"destructive"}>Spend</Button>
+        </DrawerTrigger>
+      )}
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
@@ -318,19 +377,36 @@ export function AddExpenseDrawer() {
               className={cn(moneyLeft - price < 0 && "text-destructive")}
             >
               {" "}
-              {moneyLeft - price < 0 ? "No money left!" : "Add expense"}
+              {moneyLeft - price < 0 ? "No money!" : "Add an expense"}
             </DrawerTitle>
             <DrawerDescription
               className={cn(moneyLeft - price < 0 && "text-destructive")}
             >
               {moneyLeft - price < 0
-                ? "Add an Income before continuing!"
-                : "Add an expenses for this month"}
+                ? "Earn an income before spending!"
+                : "What have you spent?"}
             </DrawerDescription>
           </DrawerHeader>
           <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
             <div className="flex items-center justify-center space-x-2">
               <div className="flex flex-col gap-2">
+                <div className="flex-1 text-center">
+                  <Label
+                    className="text-muted-foreground text-[0.70rem] uppercase"
+                    htmlFor="expenseName"
+                  >
+                    Name
+                  </Label>
+                  <Input
+                    className="text-7xl font-bold tracking-tighter"
+                    type="text"
+                    required
+                    value={name || ""}
+                    onChange={(e) => setName(e.currentTarget.value)}
+                    placeholder="Electrical bill"
+                    name="expenseName"
+                  />
+                </div>
                 <div className="flex-1 text-center">
                   <Label
                     className="text-muted-foreground text-[0.70rem] uppercase"
@@ -347,23 +423,6 @@ export function AddExpenseDrawer() {
                     onChange={(e) => setPrice(Number(e.currentTarget.value))}
                     required
                     name="expensePrice"
-                  />
-                </div>
-                <div className="flex-1 text-center">
-                  <Label
-                    className="text-muted-foreground text-[0.70rem] uppercase"
-                    htmlFor="expenseName"
-                  >
-                    Name
-                  </Label>
-                  <Input
-                    className="text-7xl font-bold tracking-tighter"
-                    type="text"
-                    required
-                    value={name || ""}
-                    onChange={(e) => setName(e.currentTarget.value)}
-                    placeholder="Electrical bill"
-                    name="expenseName"
                   />
                 </div>
                 <div className="flex-1 text-center">
@@ -386,7 +445,7 @@ export function AddExpenseDrawer() {
               form="expenseForm"
               disabled={loading || moneyLeft - price < 0}
             >
-              {loading ? "Please wait..." : "Add"}
+              {loading ? "Please wait..." : "Spend"}
             </Button>
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>
@@ -425,18 +484,37 @@ function AddIncomeDrawer() {
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button className="bg-green-500 hover:bg-green-500/90 font-bold">
-          Add Income
+          Earn
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
-            <DrawerTitle>Add Income</DrawerTitle>
-            <DrawerDescription>Add an income for this month</DrawerDescription>
+            <DrawerTitle>Add an Income</DrawerTitle>
+            <DrawerDescription>
+              What have you earned this month?
+            </DrawerDescription>
           </DrawerHeader>
           <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
             <div className="flex items-center justify-center space-x-2">
               <div className="flex flex-col gap-2">
+                <div className="flex-1 text-center">
+                  <Label
+                    className="text-muted-foreground text-[0.70rem] uppercase"
+                    htmlFor="incomeName"
+                  >
+                    Name
+                  </Label>
+                  <Input
+                    className="text-7xl font-bold tracking-tighter"
+                    type="text"
+                    required
+                    value={name || ""}
+                    onChange={(e) => setName(e.currentTarget.value)}
+                    placeholder="Salary"
+                    name="incomeName"
+                  />
+                </div>
                 <div className="flex-1 text-center">
                   <Label
                     className="text-muted-foreground text-[0.70rem] uppercase"
@@ -455,29 +533,12 @@ function AddIncomeDrawer() {
                     name="incomePrice"
                   />
                 </div>
-                <div className="flex-1 text-center">
-                  <Label
-                    className="text-muted-foreground text-[0.70rem] uppercase"
-                    htmlFor="incomeName"
-                  >
-                    Name
-                  </Label>
-                  <Input
-                    className="text-7xl font-bold tracking-tighter"
-                    type="text"
-                    required
-                    value={name || ""}
-                    onChange={(e) => setName(e.currentTarget.value)}
-                    placeholder="Salary"
-                    name="incomeName"
-                  />
-                </div>
               </div>
             </div>
           </form>
           <DrawerFooter>
             <Button type="submit" form="expenseForm" disabled={loading}>
-              {loading ? "Please wait..." : "Add"}
+              {loading ? "Please wait..." : "Earn"}
             </Button>
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>
@@ -523,14 +584,31 @@ function AddSavingDrawer() {
   }
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
+      {moneyLeft <= 0 ? (
         <Button
-          className="bg-blue-500 hover:bg-blue-500/90 font-bold h-8"
-          disabled={moneyLeft <= 0}
+          className="opacity-50 cursor-not-allowed bg-blue-500 hover:bg-blue-500"
+          onClick={() => {
+            if (moneyLeft <= 0) {
+              toast("No money!", {
+                description: "Add an income before depositing",
+                action: {
+                  label: "Close",
+                  onClick: () => console.log("Close toast"),
+                },
+              });
+            }
+          }}
         >
-          Add Savings
+          Deposit
         </Button>
-      </DrawerTrigger>
+      ) : (
+        <DrawerTrigger asChild>
+          <Button className="bg-blue-500 hover:bg-blue-500/90 font-bold h-8">
+            Deposit
+          </Button>
+        </DrawerTrigger>
+      )}
+
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
@@ -538,19 +616,30 @@ function AddSavingDrawer() {
               className={cn(moneyLeft - price < 0 && "text-destructive")}
             >
               {" "}
-              {moneyLeft - price < 0 ? "No money left!" : "Add savings"}
+              {moneyLeft - price < 0 ? "No money!" : "Add deposit"}
             </DrawerTitle>
             <DrawerDescription
               className={cn(moneyLeft - price < 0 && "text-destructive")}
             >
               {moneyLeft - price < 0
-                ? " Add an Income before continuing!"
-                : "Add savings for this month"}
+                ? "Earn an income before depositing!"
+                : "Which goal do you wanna deposit to?"}
             </DrawerDescription>
           </DrawerHeader>
           <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
             <div className="flex items-center justify-center space-x-2">
               <div className="flex flex-col gap-2">
+                <div className="flex-1 text-center">
+                  <p className="text-muted-foreground text-[0.70rem] uppercase">
+                    Goals
+                  </p>
+                  <GoalBox
+                    selectedOption={goal}
+                    setSelectedOption={setGoal}
+                    error={comboboxError}
+                    setError={setComboboxError}
+                  />
+                </div>
                 <div className="flex-1 text-center">
                   <Label
                     className="text-muted-foreground text-[0.70rem] uppercase"
@@ -569,17 +658,6 @@ function AddSavingDrawer() {
                     name="savingsPrice"
                   />
                 </div>
-                <div className="flex-1 text-center">
-                  <p className="text-muted-foreground text-[0.70rem] uppercase">
-                    Goals
-                  </p>
-                  <GoalBox
-                    selectedOption={goal}
-                    setSelectedOption={setGoal}
-                    error={comboboxError}
-                    setError={setComboboxError}
-                  />
-                </div>
               </div>
             </div>
           </form>
@@ -589,7 +667,7 @@ function AddSavingDrawer() {
               form="expenseForm"
               disabled={loading || moneyLeft - price < 0}
             >
-              {loading ? "Please wait..." : "Add"}
+              {loading ? "Please wait..." : "Deposit"}
             </Button>
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>

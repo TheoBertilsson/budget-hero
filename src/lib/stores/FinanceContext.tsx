@@ -33,6 +33,7 @@ const FinanceContext = createContext<FinanceContextType>({
 });
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
+  const { year, month } = useDate();
   const [finance, setFinanceState] = useState<MonthlyFinance | null>(null);
   const [loading, setLoading] = useState(true);
   const incomes = finance?.incomes || [];
@@ -44,8 +45,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     finance?.expenses?.reduce((sum, curr) => sum + curr.price, 0) || 0;
   const savingsTotal =
     finance?.savings?.reduce((sum, curr) => sum + curr.price, 0) || 0;
-
-  const { year, month } = useDate();
 
   useEffect(() => {
     const fetchFinance = async () => {
