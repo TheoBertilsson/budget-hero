@@ -74,8 +74,8 @@ export function MonthlySavingProgress() {
   return (
     <>
       <Card className="w-full my-auto h-full">
-        <CardContent className="flex flex-col gap-5 px-0 justify-center  h-full py-0">
-          <div className="flex flex-col gap-1 justify-center  h-full  px-4">
+        <CardContent className="flex flex-col gap-5 px-0 justify-between  h-full py-0">
+          <div className="flex flex-col gap-1 justify-start h-full  px-4">
             <div className=" flex gap-2 flex-col">
               <div className="flex justify-end text-sm font-semibold">
                 <p>{goalThisMonth?.toLocaleString()}</p>
@@ -208,7 +208,7 @@ export function ExpenseBox() {
     <>
       <Card className="flex flex-col h-full justify-between items-center">
         {expenses.length > 0 ? (
-          <CardContent className="flex flex-col py-2 gap-4 max-h-40 overflow-auto w-full">
+          <CardContent className="flex flex-col py-2 gap-4  overflow-auto w-full">
             {expenses.map((expense, i) => {
               return (
                 <div
@@ -283,7 +283,7 @@ export function SavingsBox() {
     <>
       <Card className="flex flex-col justify-end items-center border-none shadow-none p-0">
         {savings.length ? (
-          <CardContent className="flex flex-col gap-4 max-h-20 overflow-auto w-full">
+          <CardContent className="flex flex-col gap-2 max-h-24 overflow-auto w-full">
             {savings.map((save, i) => {
               return (
                 <div
