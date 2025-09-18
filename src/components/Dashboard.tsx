@@ -24,7 +24,7 @@ import { CategoryBox, GoalBox } from "./ComboBoxes";
 import { cn } from "@/lib/utils";
 
 export function SummaryCard() {
-  const { incomes, expenses } = useFinance();
+  const { incomeTotal, expenseTotal } = useFinance();
 
   return (
     <>
@@ -32,8 +32,8 @@ export function SummaryCard() {
         <CardContent className="flex flex-col gap-2 w-full h-full ">
           <div className="flex items-center justify-center">
             <ChartRadialStacked
-              expenses={expenses || 0}
-              income={incomes || 0}
+              expenses={expenseTotal || 0}
+              income={incomeTotal || 0}
             />
           </div>
         </CardContent>
@@ -71,20 +71,22 @@ export function MonthlySavingProgress() {
 
   return (
     <>
-      <Card className="w-full my-auto">
-        <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
-          <div className="flex justify-end text-sm font-semibold">
-            <p>{goalThisMonth?.toLocaleString()}</p>
-          </div>
-          <div className="flex flex-col justify-center items-center">
-            <Progress
-              value={monthlyProgress > 100 ? 100 : monthlyProgress}
-              className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-cyan-400 [&>div]:via-sky-500 [&>div]:to-indigo-500 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
-              id="monthlyProgress"
-            />
-            {monthlyProgress >= 100 && (
-              <ConfettiExplosion className="" duration={5000} />
-            )}
+      <Card className="w-full my-auto h-full">
+        <CardContent className="flex flex-col gap-5 pb-2 justify-center  h-full ">
+          <div className=" flex gap-2 flex-col">
+            <div className="flex justify-end text-sm font-semibold">
+              <p>{goalThisMonth?.toLocaleString()}</p>
+            </div>
+            <div className="flex flex-col justify-center items-center">
+              <Progress
+                value={monthlyProgress > 100 ? 100 : monthlyProgress}
+                className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-cyan-400 [&>div]:via-sky-500 [&>div]:to-indigo-500 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
+                id="monthlyProgress"
+              />
+              {monthlyProgress >= 100 && (
+                <ConfettiExplosion className="" duration={5000} />
+              )}
+            </div>
           </div>
 
           <p className="text-sm leading-6">
@@ -151,7 +153,7 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
 
   return (
     <>
-      <Card className="flex flex-col h-full justify-evenly items-center">
+      <Card className="flex flex-col h-full justify-between items-center">
         {subGoals.length ? (
           <CardContent className="flex flex-col py-2 gap-4 max-h-80 overflow-auto w-full">
             {subGoals.map((goal, i) => {
@@ -178,9 +180,12 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
             })}
           </CardContent>
         ) : (
-          <CardContent className="flex justify-center items-center text-primary/60">
-            <p>No sub goals set</p>
-          </CardContent>
+          <>
+            <div></div>
+            <CardContent className="flex justify-center items-center text-primary/60">
+              <p>No sub goals set</p>
+            </CardContent>
+          </>
         )}
         <CardFooter className="flex justify-end w-full">
           <Button variant={"outline"} onClick={() => setShow(true)}>
@@ -192,8 +197,43 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
   );
 }
 
+export function IncomeBox() {
+  const { incomes } = useFinance();
+
+  return (
+    <>
+      <Card className="flex flex-col h-full justify-between items-center">
+        {incomes.length ? (
+          <CardContent className="flex flex-col py-2 gap-4 max-h-40 overflow-auto w-full">
+            {incomes.map((income, i) => {
+              return (
+                <div
+                  className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
+                  key={i}
+                >
+                  <p>{income.item.toLocaleString()}</p>
+                  <p>{income.cost.toLocaleString()}</p>
+                </div>
+              );
+            })}
+          </CardContent>
+        ) : (
+          <>
+            <div></div>
+            <CardContent className="flex justify-center items-center text-primary/60">
+              <p>No income yet</p>
+            </CardContent>
+          </>
+        )}
+        <CardFooter className="flex justify-end w-full items-end ">
+          <AddIncomeDrawer />
+        </CardFooter>
+      </Card>
+    </>
+  );
+}
 export function AddExpenseDrawer() {
-  const { addExpense, incomes, expenses } = useFinance();
+  const { addExpense, incomeTotal, expenseTotal } = useFinance();
   const [price, setPrice] = useState(0);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
@@ -201,7 +241,7 @@ export function AddExpenseDrawer() {
   const [open, setOpen] = useState(false);
   const [comboboxError, setComboboxError] = useState(false);
 
-  const moneyLeft = (incomes || 0) - (expenses || 0);
+  const moneyLeft = incomeTotal - expenseTotal;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -411,7 +451,7 @@ function AddIncomeDrawer() {
 }
 
 function AddSavingDrawer() {
-  const { addSavings, incomes, expenses } = useFinance();
+  const { addSavings, incomeTotal, expenseTotal } = useFinance();
   const { addPayment } = useSavingsGoal();
   const { year, month } = useDate();
   const [price, setPrice] = useState(0);
@@ -419,7 +459,7 @@ function AddSavingDrawer() {
   const [comboboxError, setComboboxError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const moneyLeft = (incomes || 0) - (expenses || 0);
+  const moneyLeft = incomeTotal - expenseTotal;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

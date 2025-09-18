@@ -13,8 +13,10 @@ import { useDate } from "./DateContext";
 
 const FinanceContext = createContext<FinanceContextType>({
   finance: null,
-  incomes: null,
-  expenses: null,
+  incomes: [],
+  expenses: [],
+  incomeTotal: 0,
+  expenseTotal: 0,
   loading: true,
   setFinance: async () => {},
   addExpense: async () => {},
@@ -25,9 +27,11 @@ const FinanceContext = createContext<FinanceContextType>({
 export function FinanceProvider({ children }: { children: ReactNode }) {
   const [finance, setFinanceState] = useState<MonthlyFinance | null>(null);
   const [loading, setLoading] = useState(true);
-  const incomes =
+  const incomes = finance?.incomes || [];
+  const expenses = finance?.expenses || [];
+  const incomeTotal =
     finance?.incomes?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
-  const expenses =
+  const expenseTotal =
     finance?.expenses?.reduce((sum, curr) => sum + curr.cost, 0) || 0;
 
   const { year, month } = useDate();
@@ -168,6 +172,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         finance,
         incomes,
         expenses,
+        incomeTotal,
+        expenseTotal,
         loading,
         setFinance,
         addExpense,
