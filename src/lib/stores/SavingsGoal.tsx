@@ -36,6 +36,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
   const { year, month } = useDate();
   const [goals, setGoals] = useState<SavingGoalType[]>([]);
   const mainGoal = goals.find((goal) => goal.type === "main") || null;
+  const subGoals = goals.filter((goal) => goal.type === "sub");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,15 +47,22 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const savingGoalRef = doc(db, "users", user.uid, "finance", "savings");
-      const snap = await getDoc(savingGoalRef);
+      const savingsCollection = collection(
+        db,
+        "users",
+        user.uid,
+        "finance",
+        "savings",
+        "goals"
+      );
 
-      if (snap.exists()) {
-        const data = snap.data();
-        setGoals(data.goals || []);
-      } else {
-        setGoals([]);
-      }
+      const querySnap = await getDocs(savingsCollection);
+      const allGoals: SavingGoalType[] = querySnap.docs.map((docSnap) => ({
+        ...(docSnap.data() as SavingGoalType),
+        id: docSnap.id,
+      }));
+
+      setGoals(allGoals);
       setLoading(false);
     };
     fetchSavings();
@@ -255,7 +263,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
   return (
     <SavingContext.Provider
-      value={{ goals, mainGoal, addSavingsGoal, addPayment, loading }}
+      value={{ goals, mainGoal, subGoals, addSavingsGoal, addPayment, loading }}
     >
       {children}
     </SavingContext.Provider>

@@ -1,7 +1,7 @@
 import { useFinance } from "@/lib/stores/FinanceContext";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import {
   Drawer,
   DrawerClose,
@@ -71,11 +71,10 @@ export function MonthlySavingProgress() {
 
   return (
     <>
-      <Card className="w-full h-full my-auto">
+      <Card className="w-full my-auto">
         <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
-          <div className="flex justify-between text-sm">
-            <p>0 SEK</p>
-            <p>{goalThisMonth?.toLocaleString()} SEK</p>
+          <div className="flex justify-end text-sm font-semibold">
+            <p>{goalThisMonth?.toLocaleString()}</p>
           </div>
           <div className="flex flex-col justify-center items-center">
             <Progress
@@ -114,11 +113,11 @@ export function TotalSavingsGoal() {
 
   return (
     <>
-      <Card className="w-full h-full my-auto">
+      <Card className="w-full h-full flex flex-col gap-0">
         <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
-          <div className="flex justify-between text-sm md:text-base">
-            <p>0 SEK</p>
-            <p>{mainGoal?.goal?.toLocaleString()} SEK</p>
+          <div className=" text-xs font-semibold flex justify-between">
+            <p>{mainGoal?.name.toLocaleString()}</p>
+            <p>{mainGoal?.goal.toLocaleString()}</p>
           </div>
           <div className="flex justify-center items-center">
             <Progress
@@ -142,6 +141,52 @@ export function TotalSavingsGoal() {
             of your goal!
           </p>
         </CardContent>
+      </Card>
+    </>
+  );
+}
+
+export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
+  const { subGoals } = useSavingsGoal();
+
+  return (
+    <>
+      <Card className="flex flex-col h-full justify-evenly items-center">
+        {subGoals.length ? (
+          <CardContent className="flex flex-col py-2 gap-4 max-h-80 overflow-auto w-full">
+            {subGoals.map((goal, i) => {
+              const progress = goal.goal
+                ? Math.ceil((goal.total / goal.goal) * 100)
+                : 0;
+              return (
+                <div className="flex flex-col gap-1" key={i}>
+                  <div className=" text-xs font-semibold flex justify-between">
+                    <p>{goal.name.toLocaleString()}</p>
+                    <p>{goal.goal.toLocaleString()}</p>
+                  </div>
+
+                  <div className="flex justify-center items-center">
+                    <Progress
+                      value={progress > 100 ? 100 : progress}
+                      className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-green-600 [&>div]:to-green-400 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
+                      id="monthlyProgress"
+                    />
+                    {progress >= 100 && <ConfettiExplosion duration={5000} />}
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        ) : (
+          <CardContent className="flex justify-center items-center text-primary/60">
+            <p>No sub goals set</p>
+          </CardContent>
+        )}
+        <CardFooter className="flex justify-end w-full">
+          <Button variant={"outline"} onClick={() => setShow(true)}>
+            New goal
+          </Button>
+        </CardFooter>
       </Card>
     </>
   );

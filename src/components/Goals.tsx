@@ -14,6 +14,7 @@ import { Slider } from "./ui/slider";
 import { Checkbox } from "./ui/checkbox";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { RadioGroup } from "radix-ui";
+import { ClosedCaptionIcon, CrossIcon, X } from "lucide-react";
 
 export function SetupMainGoalCard() {
   const { addSavingsGoal, loading } = useSavingsGoal();
@@ -146,7 +147,11 @@ export function SetupMainGoalCard() {
   );
 }
 
-export function SetupNewGoal() {
+export function SetupNewGoal({
+  setShow,
+}: {
+  setShow: (show: boolean) => void;
+}) {
   const { addSavingsGoal, loading } = useSavingsGoal();
   const [yearsOfSaving, setYearsOfSaving] = useState(3);
   const [goalName, setGoalName] = useState("");
@@ -189,8 +194,15 @@ export function SetupNewGoal() {
       <div className="absolute h-svh w-dvw flex justify-center items-center bg-primary/80 z-50">
         <Card className="w-full max-w-sm">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">
-              Set up a new saving goal
+            <CardTitle className="text-2xl font-bold flex justify-between items-center">
+              <p>Set up a new saving goal</p>
+              <Button
+                variant={"outline"}
+                className="size-8 p-0"
+                onClick={() => setShow(false)}
+              >
+                <X className="size-5" />
+              </Button>
             </CardTitle>
             <CardDescription>
               Add a sub goal or replace your main goal
@@ -278,10 +290,13 @@ export function SetupNewGoal() {
           <CardFooter className="flex-col gap-2">
             <Button
               className="w-full"
-              onClick={handleSubmit}
+              onClick={() => {
+                handleSubmit();
+                setShow(false);
+              }}
               disabled={loading}
             >
-              {loading ? "Please wait..." : "Start the planning"}
+              {loading ? "Please wait..." : "Add new goal"}
             </Button>
           </CardFooter>
         </Card>

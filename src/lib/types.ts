@@ -59,6 +59,7 @@ export type SavingGoalType = {
 export type SavingGoalContextType = {
   goals: SavingGoalType[];
   mainGoal: SavingGoalType | null;
+  subGoals: SavingGoalType[];
   addSavingsGoal: (params: AddSavingsGoalParams) => Promise<void>;
   addPayment: (
     goalId: string,
