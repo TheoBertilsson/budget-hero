@@ -319,7 +319,7 @@ export function SavingsBox() {
 }
 
 export function AddExpenseDrawer() {
-  const { addExpense, incomeTotal, expenseTotal } = useFinance();
+  const { addExpense, incomeTotal, expenseTotal, savingsTotal } = useFinance();
   const [price, setPrice] = useState(0);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
@@ -327,8 +327,7 @@ export function AddExpenseDrawer() {
   const [open, setOpen] = useState(false);
   const [comboboxError, setComboboxError] = useState(false);
 
-  const moneyLeft = incomeTotal - expenseTotal;
-  console.log(moneyLeft);
+  const moneyLeft = incomeTotal - expenseTotal - savingsTotal;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -361,10 +360,10 @@ export function AddExpenseDrawer() {
           onClick={() => {
             if (moneyLeft <= 0) {
               toast("No money!", {
-                description: "Add an income before adding a new expense",
+                description: "You can't spend money you don't have!",
                 action: {
                   label: "Close",
-                  onClick: () => console.log("Close toast"),
+                  onClick: () => {},
                 },
               });
             }
@@ -558,7 +557,7 @@ function AddIncomeDrawer() {
 }
 
 function AddSavingDrawer() {
-  const { addSavings, incomeTotal, expenseTotal } = useFinance();
+  const { addSavings, incomeTotal, expenseTotal, savingsTotal } = useFinance();
   const { addPayment } = useSavingsGoal();
   const { year, month } = useDate();
   const [price, setPrice] = useState(0);
@@ -566,7 +565,7 @@ function AddSavingDrawer() {
   const [comboboxError, setComboboxError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const moneyLeft = incomeTotal - expenseTotal;
+  const moneyLeft = incomeTotal - expenseTotal - savingsTotal;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -597,10 +596,10 @@ function AddSavingDrawer() {
           onClick={() => {
             if (moneyLeft <= 0) {
               toast("No money!", {
-                description: "Add an income before depositing",
+                description: "You can't save money you don't have!",
                 action: {
                   label: "Close",
-                  onClick: () => console.log("Close toast"),
+                  onClick: () => {},
                 },
               });
             }
