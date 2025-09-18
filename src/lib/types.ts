@@ -1,10 +1,10 @@
 export type MonthlyFinance = {
-  incomes: Payment[];
+  incomes: Income[];
   expenses: Expense[];
-  savings: Saving[];
+  savings: Save[];
 };
 
-export type Saving = {
+export type Save = {
   price: number;
   goal: string;
 };
@@ -13,7 +13,7 @@ export type Expense = {
   price: number;
   category: string;
 };
-export type Payment = {
+export type Income = {
   name: string;
   price: number;
 };
@@ -26,20 +26,23 @@ export type FinanceData = {
 
 export type FinanceContextType = {
   finance: MonthlyFinance | null;
-  incomes: Payment[];
+  incomes: Income[];
   expenses: Expense[];
-  savings: Saving[];
+  savings: Save[];
   incomeTotal: number;
   expenseTotal: number;
   savingsTotal: number;
   loading: boolean;
   setFinance: (data: MonthlyFinance) => Promise<void>;
   addExpense: (expense: Expense) => Promise<void>;
-  addIncome: (income: Payment) => Promise<void>;
-  addSavings: (year: string, month: string, savings: Saving) => Promise<void>;
+  addIncome: (income: Income) => Promise<void>;
+  addSavings: (year: string, month: string, savings: Save) => Promise<void>;
   removeExpense: (index: number) => Promise<void>;
   removeIncome: (index: number) => Promise<void>;
   removeSave: (index: number) => Promise<void>;
+  updateExpenses: (index: number, updatedExpense: Expense) => Promise<void>;
+  updateIncomes: (index: number, updatedIncome: Income) => Promise<void>;
+  updateSaves: (index: number, updatedSave: Save) => Promise<void>;
 };
 
 export type DateContextType = {

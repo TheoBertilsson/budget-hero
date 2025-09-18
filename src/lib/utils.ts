@@ -1,7 +1,14 @@
 import { config } from "@/components/config";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { auth } from "@/lib/firebase"; // adjust path
 
+export function getCurrentUser() {
+  const user = auth.currentUser;
+
+  if (!user) throw new Error("No user signed in");
+  return user;
+}
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

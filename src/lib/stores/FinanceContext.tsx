@@ -9,14 +9,14 @@ import {
 import {
   Expense,
   FinanceContextType,
-  FinanceData,
   MonthlyFinance,
-  Payment,
-  Saving,
+  Income,
+  Save,
 } from "../types";
 import { auth, db } from "../firebase";
 import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { useDate } from "./DateContext";
+import { getCurrentUser } from "../utils";
 
 const FinanceContext = createContext<FinanceContextType>({
   finance: null,
@@ -34,6 +34,9 @@ const FinanceContext = createContext<FinanceContextType>({
   removeExpense: async () => {},
   removeIncome: async () => {},
   removeSave: async () => {},
+  updateExpenses: async () => {},
+  updateIncomes: async () => {},
+  updateSaves: async () => {},
 });
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
@@ -53,6 +56,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchFinance = async () => {
       const user = auth.currentUser;
+
       if (!user) {
         setFinanceState(null);
         setLoading(false);
@@ -81,8 +85,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [year, month]);
 
   const setFinance = async (data: MonthlyFinance) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error("No user signed in");
+    const user = getCurrentUser();
 
     const financeRef = doc(
       db,
@@ -97,7 +100,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const addExpense = async (expense: Expense) => {
-    const user = auth.currentUser;
+    const user = getCurrentUser();
+
     if (!user) throw new Error("No user signed in");
 
     const financeRef = doc(
@@ -128,10 +132,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const addIncome = async (income: Payment) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error("No user signed in");
-
+  const addIncome = async (income: Income) => {
+    const user = getCurrentUser();
     const financeRef = doc(
       db,
       "users",
@@ -155,9 +157,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           }
     );
   };
-  const addSavings = async (year: string, month: string, saving: Saving) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error("No user signed in");
+  const addSavings = async (year: string, month: string, saving: Save) => {
+    const user = getCurrentUser();
     const financeRef = doc(
       db,
       "users",
@@ -183,9 +184,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const removeIncome = async (index: number) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error("No user signed in");
-
+    const user = getCurrentUser();
     const financeRef = doc(
       db,
       "users",
@@ -210,9 +209,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const removeSave = async (index: number) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error("No user signed in");
-
+    const user = getCurrentUser();
     const financeRef = doc(
       db,
       "users",
@@ -237,7 +234,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   };
 
   const removeExpense = async (index: number) => {
-    const user = auth.currentUser;
+    const user = getCurrentUser();
+
     if (!user) throw new Error("No user signed in");
 
     const financeRef = doc(
@@ -263,6 +261,96 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const updateIncomes = async (index: number, updatedIncome: Income) => {
+    const user = getCurrentUser();
+    const financeRef = doc(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      `${year}-${month}`
+    );
+    const snap = await getDoc(financeRef);
+
+    if (!snap.exists()) throw new Error("Finance document not found");
+
+    const data = snap.data() as MonthlyFinance;
+    const incomes = data.incomes || [];
+
+    if (index < 0 || index >= incomes.length) {
+      throw new Error("Invalid income index");
+    }
+
+    const updatedIncomes = [...incomes];
+    updatedIncomes[index] = updatedIncome;
+
+    await updateDoc(financeRef, { incomes: updatedIncomes });
+
+    setFinanceState((prev) =>
+      prev ? { ...prev, incomes: updatedIncomes } : prev
+    );
+  };
+
+  const updateSaves = async (index: number, updatedSave: Save) => {
+    const user = getCurrentUser();
+    const financeRef = doc(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      `${year}-${month}`
+    );
+    const snap = await getDoc(financeRef);
+
+    if (!snap.exists()) throw new Error("Finance document not found");
+
+    const data = snap.data() as MonthlyFinance;
+    const savings = data.savings || [];
+
+    if (index < 0 || index >= savings.length) {
+      throw new Error("Invalid income index");
+    }
+
+    const updatedSavings = [...savings];
+    updatedSavings[index] = updatedSave;
+
+    await updateDoc(financeRef, { incomes: updatedSavings });
+
+    setFinanceState((prev) =>
+      prev ? { ...prev, savings: updatedSavings } : prev
+    );
+  };
+
+  const updateExpenses = async (index: number, updatedExpense: Expense) => {
+    const user = getCurrentUser();
+    const financeRef = doc(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      `${year}-${month}`
+    );
+    const snap = await getDoc(financeRef);
+
+    if (!snap.exists()) throw new Error("Finance document not found");
+
+    const data = snap.data() as MonthlyFinance;
+    const deposits = data.expenses || [];
+
+    if (index < 0 || index >= deposits.length) {
+      throw new Error("Invalid income index");
+    }
+
+    const updatedExpenses = [...expenses];
+    updatedExpenses[index] = updatedExpense;
+
+    await updateDoc(financeRef, { incomes: updatedExpenses });
+
+    setFinanceState((prev) =>
+      prev ? { ...prev, expenses: updatedExpenses } : prev
+    );
+  };
+
   return (
     <FinanceContext.Provider
       value={{
@@ -281,6 +369,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         removeExpense,
         removeIncome,
         removeSave,
+        updateExpenses,
+        updateIncomes,
+        updateSaves,
       }}
     >
       {children}

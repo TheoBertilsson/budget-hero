@@ -27,6 +27,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { getCurrentUser } from "../utils";
 
 const SavingContext = createContext<SavingGoalContextType | undefined>(
   undefined
@@ -41,7 +42,8 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const fetchSavings = async () => {
-      const user = auth.currentUser;
+      const user = getCurrentUser();
+
       if (!user) {
         setLoading(false);
         return;
@@ -69,7 +71,8 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
   }, [year, month]);
 
   const addSavingsGoal = async (params: AddSavingsGoalParams) => {
-    const user = auth.currentUser;
+    const user = getCurrentUser();
+
     if (!user) throw new Error("No user signed in");
 
     setLoading(true);
@@ -132,7 +135,8 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     month: string,
     amount: number
   ) => {
-    const user = auth.currentUser;
+    const user = getCurrentUser();
+
     if (!user) throw new Error("No user signed in");
 
     const savingGoalRef = doc(
@@ -210,7 +214,8 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     startYear: number,
     startMonth: number
   ) => {
-    const user = auth.currentUser;
+    const user = getCurrentUser();
+
     if (!user) throw new Error("No user signed in");
 
     const savingGoalRef = doc(

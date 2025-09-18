@@ -11,6 +11,7 @@ import { EllipsisVerticalIcon, TrashIcon } from "lucide-react";
 import { CategoryBox } from "./ComboBoxes";
 import { useState } from "react";
 import { useFinance } from "@/lib/stores/FinanceContext";
+import { Expense, Income, Save } from "@/lib/types";
 
 type EditPopoverType = {
   type: "expense" | "save" | "income";
@@ -27,10 +28,20 @@ export function EditPopover({
   index,
   category,
 }: EditPopoverType) {
-  const { removeExpense, removeSave, removeIncome } = useFinance();
+  const {
+    removeExpense,
+    removeSave,
+    removeIncome,
+    updateExpenses,
+    updateIncomes,
+    updateSaves,
+  } = useFinance();
   const [categoryState, setCategoryState] = useState<string>(category || "");
+  const [nameState, setNameState] = useState(name);
+  const [priceState, setPriceState] = useState(price);
+  const [open, setOpen] = useState(false);
 
-  const onClick = (type: "expense" | "save" | "income", index: number) => {
+  const removeItem = (type: "expense" | "save" | "income", index: number) => {
     if (type === "expense") {
       removeExpense(index);
       setCategoryState("");
@@ -39,10 +50,21 @@ export function EditPopover({
     } else if (type === "income") {
       removeIncome(index);
     }
+    setOpen(false);
   };
-
+  const updateItem = (item: Save | Income | Expense, index: number) => {
+    if ("category" in item) {
+      updateExpenses(index, item);
+      setCategoryState("");
+    } else if ("goal" in item) {
+      updateSaves(index, item);
+    } else {
+      updateIncomes(index, item);
+    }
+    setOpen(false);
+  };
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"ghost"}
@@ -62,13 +84,21 @@ export function EditPopover({
           <div className="grid gap-2">
             <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="name">Name:</Label>
-              <Input id="name" defaultValue={name} className="col-span-2 h-8" />
+              <Input
+                id="name"
+                defaultValue={name}
+                onChange={(value) => setNameState(value.currentTarget.value)}
+                className="col-span-2 h-8"
+              />
             </div>
             <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="price">Price:</Label>
               <Input
                 id="price"
                 defaultValue={price}
+                onChange={(value) =>
+                  setPriceState(Number(value.currentTarget.value))
+                }
                 className="col-span-2 h-8"
               />
             </div>
@@ -87,11 +117,29 @@ export function EditPopover({
           <Button
             variant={"destructive"}
             className="bg-red-600 has-[>svg]:px-0 size-8"
-            onClick={() => onClick(type, index)}
+            onClick={() => removeItem(type, index)}
           >
             <TrashIcon />
           </Button>
-          <Button variant={"secondary"}>Save</Button>
+          <Button
+            variant={"secondary"}
+            onClick={() => {
+              updateItem(
+                category
+                  ? ({
+                      name: nameState,
+                      price: priceState,
+                      category,
+                    } as Expense)
+                  : type === "save" && !category
+                  ? ({ goal: nameState, price: priceState } as Save)
+                  : ({ name: nameState, price: priceState } as Income),
+                index
+              );
+            }}
+          >
+            Save
+          </Button>
         </div>
       </PopoverContent>
     </Popover>

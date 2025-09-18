@@ -13,11 +13,10 @@ import { Input } from "./ui/input";
 import { Label } from "@radix-ui/react-label";
 import { useFinance } from "@/lib/stores/FinanceContext";
 import { Button } from "./ui/button";
-import { auth } from "@/lib/firebase";
 import { useDate } from "@/lib/stores/DateContext";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { CategoryBox, GoalBox } from "./ComboBoxes";
-import { cn } from "@/lib/utils";
+import { cn, getCurrentUser } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function AddExpenseDrawer() {
@@ -34,7 +33,8 @@ export function AddExpenseDrawer() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
-    const user = auth.currentUser;
+    const user = getCurrentUser();
+
     if (!user) return;
 
     if (!category) {
@@ -174,7 +174,8 @@ export function AddIncomeDrawer() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const user = auth.currentUser;
+    const user = getCurrentUser();
+
     if (!user) return;
 
     setLoading(true);
@@ -272,7 +273,8 @@ export function AddSavingDrawer() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const user = auth.currentUser;
+    const user = getCurrentUser();
+
     if (!user) return;
 
     if (!goal) {
