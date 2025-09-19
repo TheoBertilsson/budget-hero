@@ -321,9 +321,7 @@ export function AddSavingDrawer() {
         </Button>
       ) : (
         <DrawerTrigger asChild>
-          <Button className="bg-blue-500 hover:bg-blue-500/90 font-bold h-8">
-            Deposit
-          </Button>
+          <Button className="bg-blue-500 hover:bg-blue-500/90">Deposit</Button>
         </DrawerTrigger>
       )}
 
