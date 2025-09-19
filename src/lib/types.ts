@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export type MonthlyFinance = {
   incomes: Income[];
   expenses: Expense[];
@@ -71,6 +73,7 @@ export type SavingGoalType = {
   timeInMonths: number;
   hasDeadline: boolean;
   monthly: MonthlySavings;
+  createdAt: Timestamp;
 };
 export type SavingGoalContextType = {
   goals: SavingGoalType[];

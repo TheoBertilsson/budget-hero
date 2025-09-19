@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   AddSavingsGoalParams,
+  MonthlySavings,
   SavingGoalContextType,
   SavingGoalType,
 } from "../types";
@@ -25,6 +26,7 @@ import {
   query,
   runTransaction,
   setDoc,
+  Timestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -113,6 +115,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       hasDeadline: true,
       timeInMonths: calculatedTime, // required because hasDeadline is true
       monthly: {},
+      createdAt: Timestamp.now(),
     };
 
     const docRef = await addDoc(savingsCollection, newGoal);
@@ -233,16 +236,22 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     );
     const snap = await getDoc(savingGoalRef);
     if (!snap.exists()) throw new Error("Saving goal does not exist");
-
     const goal = snap.data() as SavingGoalType;
+
+    const pastMonths = filterMonthlySavings(
+      goal.monthly,
+      goal.createdAt.toDate(),
+      new Date(startYear, startMonth, 1)
+    );
 
     let remainingGoal = totalGoal;
     let year = startYear;
     let month = startMonth;
+    let monthsLeft = numberOfMonths - countMonths(pastMonths);
 
     const newMonthlySavings: SavingGoalType["monthly"] = {};
 
-    for (let i = 0; i < numberOfMonths; i++) {
+    for (let i = 0; i < monthsLeft; i++) {
       const monthKey = month.toString().padStart(2, "0");
 
       if (!newMonthlySavings[year]) newMonthlySavings[year] = {};
@@ -250,9 +259,9 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       const prevPaid = goal.monthly?.[year]?.[monthKey]?.paid ?? 0;
 
       const monthlyGoal =
-        i === numberOfMonths - 1
+        i === monthsLeft - 1
           ? remainingGoal
-          : Math.ceil(totalGoal / numberOfMonths);
+          : Math.ceil(totalGoal / monthsLeft);
 
       newMonthlySavings[year][monthKey] = {
         goal: monthlyGoal,
@@ -268,8 +277,18 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    const mergedMonthly: SavingGoalType["monthly"] = { ...pastMonths };
+
+    for (const year of Object.keys(newMonthlySavings)) {
+      if (!mergedMonthly[year]) mergedMonthly[year] = {};
+      mergedMonthly[year] = {
+        ...mergedMonthly[year],
+        ...newMonthlySavings[year],
+      };
+    }
+
     await updateDoc(savingGoalRef, {
-      monthly: newMonthlySavings,
+      monthly: mergedMonthly,
     });
 
     return newMonthlySavings;
@@ -367,4 +386,41 @@ export function useSavingsGoal() {
   if (!ctx)
     throw new Error("useSavingsGoal must be used within a SavingsProvider");
   return ctx;
+}
+
+function filterMonthlySavings(
+  savings: MonthlySavings,
+  createdAt: Date,
+  today: Date
+): MonthlySavings {
+  const result: MonthlySavings = {};
+
+  // Normalize dates to first day of the month
+  const start = new Date(createdAt.getFullYear(), createdAt.getMonth(), 1);
+  const end = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  for (const yearStr of Object.keys(savings)) {
+    const year = parseInt(yearStr, 10);
+    for (const monthStr of Object.keys(savings[yearStr])) {
+      const month = parseInt(monthStr, 10); // 1–12
+      const current = new Date(year, month - 1, 1);
+
+      if (current >= start && current < end) {
+        if (!result[yearStr]) {
+          result[yearStr] = {};
+        }
+        result[yearStr][monthStr] = savings[yearStr][monthStr];
+      }
+    }
+  }
+
+  return result;
+}
+
+function countMonths(savings: MonthlySavings): number {
+  let count = 0;
+  for (const year of Object.keys(savings)) {
+    count += Object.keys(savings[year]).length;
+  }
+  return count;
 }
