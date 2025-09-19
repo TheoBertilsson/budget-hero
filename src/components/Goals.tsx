@@ -14,7 +14,7 @@ import { Slider } from "./ui/slider";
 import { Checkbox } from "./ui/checkbox";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { RadioGroup } from "radix-ui";
-import { ClosedCaptionIcon, CrossIcon, X } from "lucide-react";
+import { XIcon } from "lucide-react";
 
 export function SetupMainGoalCard() {
   const { addSavingsGoal, loading } = useSavingsGoal();
@@ -203,7 +203,7 @@ export function SetupNewGoal({
                 className="size-8 p-0"
                 onClick={() => setShow(false)}
               >
-                <X className="size-5" />
+                <XIcon className="size-5" />
               </Button>
             </CardTitle>
             <CardDescription>
@@ -219,7 +219,6 @@ export function SetupNewGoal({
                   id="goalName"
                   type="text"
                   onChange={(value) => setGoalName(value.currentTarget.value)}
-                  min={0}
                   name="goalName"
                   placeholder="New House"
                   required
@@ -336,7 +335,7 @@ export function SavingsSlider({
   );
 }
 
-const SubOrMainGoal = ({
+export const SubOrMainGoal = ({
   setGoalType,
 }: {
   setGoalType: (value: "main" | "sub") => void;

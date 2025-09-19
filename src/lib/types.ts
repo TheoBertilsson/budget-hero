@@ -76,6 +76,7 @@ export type SavingGoalContextType = {
   goals: SavingGoalType[];
   mainGoal: SavingGoalType | null;
   subGoals: SavingGoalType[];
+  removeGoal: (id: string) => Promise<void>;
   updateGoal: (
     goal: SavingGoalType,
     id: string,

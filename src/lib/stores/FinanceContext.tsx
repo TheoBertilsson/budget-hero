@@ -197,12 +197,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       "finance",
       `${year}-${month}`
     );
-    const snap = await getDoc(financeRef);
-
-    if (!snap.exists()) throw new Error("Finance document not found");
-
-    const data = snap.data() as MonthlyFinance;
-    const incomes = data.incomes || [];
 
     const updatedIncomes = incomes.filter((_, i) => i !== index);
 
@@ -223,12 +217,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       `${year}-${month}`
     );
 
-    const snap = await getDoc(financeRef);
-
-    if (!snap.exists()) throw new Error("Finance document not found");
-
-    const data = snap.data() as MonthlyFinance;
-    const save = data.savings[index];
+    const save = savings[index];
 
     const goal = goals.find((goal) => goal.id === save.goalId);
     if (!goal) throw new Error("No goal found");
@@ -274,12 +263,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       "finance",
       `${year}-${month}`
     );
-    const snap = await getDoc(financeRef);
-
-    if (!snap.exists()) throw new Error("Finance document not found");
-
-    const data = snap.data() as MonthlyFinance;
-    const expenses = data.expenses || [];
 
     const updatedExpenses = expenses.filter((_, i) => i !== index);
 

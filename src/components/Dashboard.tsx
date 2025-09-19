@@ -8,7 +8,7 @@ import ConfettiExplosion from "react-confetti-explosion";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { capitalize } from "@/lib/utils";
 import { ScrollArea } from "./ui/scroll-area";
-import { EditPopover } from "./EditPopover";
+import { EditGoals, EditPopover } from "./EditPopover";
 import { AddExpenseDrawer, AddIncomeDrawer, AddSavingDrawer } from "./Drawers";
 
 export function SummaryCard() {
@@ -142,7 +142,11 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
                   <div className="flex flex-col gap-1" key={i}>
                     <div className=" text-xs font-semibold flex justify-between">
                       <p>{goal.name.toLocaleString()}</p>
-                      <p>{goal.goal.toLocaleString()}</p>
+
+                      <div className="flex gap-1 items-center">
+                        <p>{goal.goal.toLocaleString()}</p>
+                        <EditGoals goal={goal} />
+                      </div>
                     </div>
 
                     <div className="flex justify-center items-center">

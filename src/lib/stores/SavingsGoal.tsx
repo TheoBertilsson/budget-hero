@@ -18,6 +18,7 @@ import {
   addDoc,
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -331,6 +332,24 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   };
 
+  const removeGoal = async (id: string) => {
+    const user = getCurrentUser();
+    if (!user) throw new Error("No user signed in");
+
+    const goalRef = doc(
+      db,
+      "users",
+      user.uid,
+      "finance",
+      "savings",
+      "goals",
+      id
+    );
+
+    await deleteDoc(goalRef);
+    setGoalsState((prev) => prev.filter((goal) => goal.id !== id));
+  };
+
   return (
     <SavingContext.Provider
       value={{
@@ -338,6 +357,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
         mainGoal,
         subGoals,
         updateGoal,
+        removeGoal,
         addSavingsGoal,
         addPayment,
         loading,
