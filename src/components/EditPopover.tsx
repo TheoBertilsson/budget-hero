@@ -285,7 +285,11 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
             variant="secondary"
             onClick={() => {
               setOpen(false);
-              updateGoal(updatedGoal, goal.id);
+              updateGoal(
+                updatedGoal,
+                goal.id,
+                hasDeadline ? undefined : monthlyGoal
+              );
             }}
           >
             Save
@@ -422,7 +426,11 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
             variant="secondary"
             onClick={() => {
               setOpen(false);
-              updateGoal(updatedGoal, goal.id);
+              updateGoal(
+                updatedGoal,
+                goal.id,
+                hasDeadline ? undefined : monthlyGoal
+              );
             }}
           >
             Save
