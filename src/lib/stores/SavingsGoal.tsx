@@ -187,8 +187,6 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
         if (remainingGoal > 0 && futureMonths.length > 0) {
           const newMonthlyGoal = Math.ceil(remainingGoal / futureMonths.length);
 
-          console.log(newMonthlyGoal);
-
           futureMonths.forEach(({ year: y, month: m }) => {
             if (!goal.monthly[y]) goal.monthly[y] = {};
             if (!goal.monthly[y][m]) goal.monthly[y][m] = { goal: 0, paid: 0 };
@@ -280,8 +278,6 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
   const updateGoal = async (updatedGoal: SavingGoalType, id: string) => {
     const user = getCurrentUser();
     if (!user) throw new Error("No user signed in");
-
-    console.log(updatedGoal.timeInMonths);
 
     setLoading(true);
 
