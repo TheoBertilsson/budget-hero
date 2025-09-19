@@ -137,7 +137,6 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     amount: number
   ) => {
     const user = getCurrentUser();
-
     if (!user) throw new Error("No user signed in");
 
     const savingGoalRef = doc(
@@ -167,7 +166,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       goal.total += amount;
 
       if (goal.hasDeadline) {
-        const months = Object.entries(goal.monthly)
+        const allMonths = Object.entries(goal.monthly)
           .flatMap(([y, monthsObj]) =>
             Object.keys(monthsObj).map((m) => ({ year: y, month: m }))
           )
@@ -177,24 +176,29 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
               new Date(`${b.year}-${b.month}-01`).getTime()
           );
 
-        const remainingMonths = months.filter(
-          ({ year: y, month: m }) => !(y === year && m === month)
+        const futureMonths = allMonths.filter(
+          ({ year: y, month: m }) =>
+            y > year || (y === year && Number(m) > Number(month))
         );
 
-        const currentGoal = goal.monthly[year][month].goal ?? 0;
-        const currentPaid = goal.monthly[year][month].paid;
-        const leftover = Math.max(currentGoal - currentPaid, 0);
+        const paidSoFar = goal.total;
+        const remainingGoal = Math.max(goal.goal - paidSoFar, 0);
 
-        const remainingGoal = goal.goal - goal.total + leftover;
+        if (remainingGoal > 0 && futureMonths.length > 0) {
+          const newMonthlyGoal = Math.ceil(remainingGoal / futureMonths.length);
 
-        if (remainingGoal > 0 && remainingMonths.length > 0) {
-          const newMonthlyGoal = Number(
-            Math.ceil(remainingGoal / remainingMonths.length)
-          );
-          remainingMonths.forEach(({ year: y, month: m }) => {
+          console.log(newMonthlyGoal);
+
+          futureMonths.forEach(({ year: y, month: m }) => {
             if (!goal.monthly[y]) goal.monthly[y] = {};
             if (!goal.monthly[y][m]) goal.monthly[y][m] = { goal: 0, paid: 0 };
             goal.monthly[y][m].goal = newMonthlyGoal;
+          });
+        } else if (remainingGoal <= 0) {
+          futureMonths.forEach(({ year: y, month: m }) => {
+            if (!goal.monthly[y]) goal.monthly[y] = {};
+            if (!goal.monthly[y][m]) goal.monthly[y][m] = { goal: 0, paid: 0 };
+            goal.monthly[y][m].goal = 0;
           });
         }
       }
@@ -238,21 +242,19 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     let year = startYear;
     let month = startMonth;
 
-    // Clone existing monthly savings if available
-    const existingMonthly = goal.monthly ?? {};
-    const newMonthlySavings: SavingGoalType["monthly"] = { ...existingMonthly };
+    const newMonthlySavings: SavingGoalType["monthly"] = {};
 
     for (let i = 0; i < numberOfMonths; i++) {
       const monthKey = month.toString().padStart(2, "0");
+
+      if (!newMonthlySavings[year]) newMonthlySavings[year] = {};
+
+      const prevPaid = goal.monthly?.[year]?.[monthKey]?.paid ?? 0;
+
       const monthlyGoal =
         i === numberOfMonths - 1
           ? remainingGoal
           : Math.ceil(totalGoal / numberOfMonths);
-
-      if (!newMonthlySavings[year]) newMonthlySavings[year] = {};
-
-      // Preserve paid if exists, otherwise default to 0
-      const prevPaid = newMonthlySavings[year][monthKey]?.paid ?? 0;
 
       newMonthlySavings[year][monthKey] = {
         goal: monthlyGoal,
@@ -260,6 +262,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       };
 
       remainingGoal -= monthlyGoal;
+
       month++;
       if (month > 12) {
         month = 1;
