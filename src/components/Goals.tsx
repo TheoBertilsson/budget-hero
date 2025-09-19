@@ -23,8 +23,9 @@ export function SetupMainGoalCard() {
   const [goalName, setGoalName] = useState("");
   const [savingsGoalState, setSavingsGoalState] = useState(0);
   const calculatedMonthlySavingsGoal = savingsGoalState / (yearsOfSaving * 12);
-  const calculatedMonthlySavingsGoalDisplay =
-    calculatedMonthlySavingsGoal.toLocaleString();
+  const calculatedMonthlySavingsGoalDisplay = Math.ceil(
+    calculatedMonthlySavingsGoal
+  ).toLocaleString();
   const [monthlySavingsGoal, setMonthlySavingsGoal] = useState(0);
   const [noDeadline, setNoDeadline] = useState(false);
 
@@ -321,7 +322,7 @@ export function SavingsSlider({
           value={[yearsOfSaving]}
           onValueChange={(val) => setYearsOfSaving(val[0])}
           max={65}
-          min={0}
+          min={1}
           step={1}
         />
       </div>
