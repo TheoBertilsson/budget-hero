@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { EllipsisVerticalIcon, TrashIcon } from "lucide-react";
 import { CategoryBox } from "./ComboBoxes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFinance } from "@/lib/stores/FinanceContext";
 import { Expense, Income, Save, SavingGoalType } from "@/lib/types";
 import { SavingsSlider, SubOrMainGoal } from "./Goals";
@@ -154,7 +154,7 @@ export function EditPopover({
 
 export function EditGoals({ goal }: { goal: SavingGoalType }) {
   const { year, month } = useDate();
-  const { removeGoal } = useSavingsGoal();
+  const { removeGoal, updateGoal } = useSavingsGoal();
   const [hasDeadlineState, setHasDeadlineState] = useState(goal.hasDeadline);
   const [name, setName] = useState(goal.name);
   const [goalState, setGoalState] = useState(goal.goal);
@@ -166,8 +166,27 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
   const [yearsOfSaving, setYearsOfSaving] = useState(
     Math.ceil(goal.timeInMonths / 12)
   );
+
+  useEffect(() => {
+    setHasDeadlineState(goal.hasDeadline);
+    setName(goal.name);
+    setGoalState(goal.goal);
+    setMonthlySavingsGoal(goal?.monthly?.[year]?.[month]?.goal ?? 0);
+    setType(goal.type);
+    setYearsOfSaving(Math.ceil(goal.timeInMonths / 12));
+  }, [goal, year, month]);
+
   const monthlyGoal = Math.ceil(goalState / (yearsOfSaving * 12));
   const monthlyGoalDisplay = monthlyGoal.toLocaleString();
+
+  const updatedGoal = {
+    ...goal,
+    hasDeadline: hasDeadlineState,
+    goal: goalState,
+    name,
+    type,
+    timeInMonths: yearsOfSaving * 12,
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -267,7 +286,17 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
           >
             <TrashIcon />
           </Button>
-          <Button variant={"secondary"} onClick={() => {}}>
+          <Button
+            variant={"secondary"}
+            onClick={() => {
+              setOpen(false);
+              updateGoal(
+                updatedGoal,
+                goal.id,
+                monthlySavingsGoal ? monthlySavingsGoal : undefined
+              );
+            }}
+          >
             Save
           </Button>
         </div>
