@@ -15,15 +15,14 @@ import { Checkbox } from "./ui/checkbox";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { RadioGroup } from "radix-ui";
 import { XIcon } from "lucide-react";
+import { ceilToOneDecimal } from "@/lib/utils";
 
 export function SetupMainGoalCard() {
   const { addSavingsGoal, loading } = useSavingsGoal();
   const [yearsOfSaving, setYearsOfSaving] = useState(3);
   const [goalName, setGoalName] = useState("");
   const [savingsGoalState, setSavingsGoalState] = useState(0);
-  const calculatedMonthlySavingsGoal = Math.ceil(
-    savingsGoalState / (yearsOfSaving * 12)
-  );
+  const calculatedMonthlySavingsGoal = savingsGoalState / (yearsOfSaving * 12);
   const calculatedMonthlySavingsGoalDisplay =
     calculatedMonthlySavingsGoal.toLocaleString();
   const [monthlySavingsGoal, setMonthlySavingsGoal] = useState(0);
@@ -157,9 +156,7 @@ export function SetupNewGoal({
   const [goalName, setGoalName] = useState("");
   const [goalType, setGoalType] = useState<"sub" | "main">("sub");
   const [savingsGoalState, setSavingsGoalState] = useState(0);
-  const calculatedMonthlySavingsGoal = Math.ceil(
-    savingsGoalState / (yearsOfSaving * 12)
-  );
+  const calculatedMonthlySavingsGoal = savingsGoalState / (yearsOfSaving * 12);
   const calculatedMonthlySavingsGoalDisplay =
     calculatedMonthlySavingsGoal.toLocaleString();
   const [monthlySavingsGoal, setMonthlySavingsGoal] = useState(0);
@@ -316,7 +313,8 @@ export function SavingsSlider({
   return (
     <div className="w-full flex flex-col gap-2">
       <Label>
-        <span className="font-bold">{yearsOfSaving}</span> Years of saving
+        <span className="font-bold">{ceilToOneDecimal(yearsOfSaving)}</span>{" "}
+        Years of saving
       </Label>
       <div className="px-4 ">
         <Slider

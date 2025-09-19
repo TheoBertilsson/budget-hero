@@ -28,7 +28,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { getCurrentUser } from "../utils";
+import { ceilToOneDecimal, getCurrentUser } from "../utils";
 
 const SavingContext = createContext<SavingGoalContextType | undefined>(
   undefined
@@ -101,7 +101,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
 
     const calculatedTime =
       !params.timeInMonths && params.monthlyGoal
-        ? Math.ceil(params.goal / params.monthlyGoal)
+        ? params.goal / params.monthlyGoal
         : params.timeInMonths || 0;
 
     const newGoal: SavingGoalType = {
@@ -188,8 +188,8 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
         const remainingGoal = goal.goal - goal.total + leftover;
 
         if (remainingGoal > 0 && remainingMonths.length > 0) {
-          const newMonthlyGoal = Math.ceil(
-            remainingGoal / remainingMonths.length
+          const newMonthlyGoal = Number(
+            Math.ceil(remainingGoal / remainingMonths.length)
           );
           remainingMonths.forEach(({ year: y, month: m }) => {
             if (!goal.monthly[y]) goal.monthly[y] = {};

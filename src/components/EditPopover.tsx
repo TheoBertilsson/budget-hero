@@ -158,33 +158,27 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
   const [name, setName] = useState(goal.name);
   const [goalState, setGoalState] = useState(goal.goal);
   const [type, setType] = useState(goal.type);
-  const [yearsOfSaving, setYearsOfSaving] = useState(
-    Math.ceil(goal.timeInMonths / 12)
-  );
-  const [monthlySavingsGoal, setMonthlySavingsGoal] = useState(
-    goal?.monthly?.[year]?.[month]?.goal ?? 0
-  );
-  const [noDeadline, setNoDeadline] = useState(!goal.hasDeadline);
+  const [yearsOfSaving, setYearsOfSaving] = useState(goal.timeInMonths / 12);
+  const [hasDeadline, setHasDeadline] = useState(goal.hasDeadline);
 
   useEffect(() => {
     setName(goal.name);
     setGoalState(goal.goal);
     setType(goal.type);
-    setYearsOfSaving(Math.ceil(goal.timeInMonths / 12));
-    setMonthlySavingsGoal(goal?.monthly?.[year]?.[month]?.goal ?? 0);
-    setNoDeadline(!goal.hasDeadline);
-  }, [goal, year, month]);
+    setYearsOfSaving(goal.timeInMonths / 12);
+    setHasDeadline(goal.hasDeadline);
+  }, [goal]);
 
-  const monthlyGoal = Math.ceil(goalState / (yearsOfSaving * 12));
-  const monthlyGoalDisplay = monthlyGoal.toLocaleString();
+  const monthlyGoal = goalState / (yearsOfSaving * 12);
+  const monthlyGoalDisplay = Math.ceil(monthlyGoal).toLocaleString();
 
   const updatedGoal = {
     ...goal,
     name,
     goal: goalState,
     type,
-    hasDeadline: !noDeadline,
-    timeInMonths: yearsOfSaving * 12,
+    hasDeadline,
+    timeInMonths: Math.ceil(yearsOfSaving * 12),
   };
 
   return (
@@ -230,32 +224,17 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
 
           <div className="grid gap-2">
             <div className="flex w-full justify-end items-center gap-2">
-              <Label htmlFor="noDeadline" className="text-sm">
+              <Label htmlFor="hasDeadline" className="text-sm">
                 No deadline
               </Label>
               <Checkbox
-                id="noDeadline"
-                checked={noDeadline}
-                onCheckedChange={(checked) => setNoDeadline(checked === true)}
+                id="hasDeadline"
+                checked={!hasDeadline}
+                onCheckedChange={(checked) => setHasDeadline(!checked)}
               />
             </div>
 
-            {noDeadline ? (
-              <div className="grid gap-2">
-                <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
-                <Input
-                  id="monthlyGoal"
-                  type="number"
-                  min={0}
-                  placeholder="1 000 000"
-                  value={monthlySavingsGoal}
-                  onChange={(e) =>
-                    setMonthlySavingsGoal(Number(e.currentTarget.value))
-                  }
-                  required
-                />
-              </div>
-            ) : (
+            {hasDeadline ? (
               <>
                 <SavingsSlider
                   yearsOfSaving={yearsOfSaving}
@@ -267,6 +246,25 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
                   SEK/month
                 </p>
               </>
+            ) : (
+              <div className="grid gap-2">
+                <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+                <Input
+                  id="monthlyGoal"
+                  type="number"
+                  min={0}
+                  placeholder="1 000 000"
+                  defaultValue={updatedGoal.monthly[year][month].goal}
+                  onChange={(e) => {
+                    const monthlyGoal = Number(e.currentTarget.value);
+                    if (monthlyGoal > 0) {
+                      const months = goalState / monthlyGoal;
+                      setYearsOfSaving(months / 12);
+                    }
+                  }}
+                  required
+                />
+              </div>
             )}
           </div>
         </div>
@@ -287,11 +285,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
             variant="secondary"
             onClick={() => {
               setOpen(false);
-              updateGoal(
-                updatedGoal,
-                goal.id,
-                noDeadline ? monthlySavingsGoal : undefined
-              );
+              updateGoal(updatedGoal, goal.id);
             }}
           >
             Save
@@ -310,29 +304,24 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
   const [name, setName] = useState(goal.name);
   const [goalAmount, setGoalAmount] = useState(goal.goal);
 
-  const [yearsOfSaving, setYearsOfSaving] = useState(
-    Math.ceil(goal.timeInMonths / 12)
-  );
+  const [yearsOfSaving, setYearsOfSaving] = useState(goal.timeInMonths / 12);
   const [open, setOpen] = useState(false);
-
   useEffect(() => {
     setHasDeadline(goal.hasDeadline);
     setName(goal.name);
     setGoalAmount(goal.goal);
-    setYearsOfSaving(Math.ceil(goal.timeInMonths / 12));
-  }, [goal, year, month]);
+    setYearsOfSaving(goal.timeInMonths / 12);
+  }, [goal]);
 
-  const monthlyGoal = Math.ceil(goalAmount / (yearsOfSaving * 12));
-  console.log(
-    yearsOfSaving + " + " + monthlyGoal + " = " + Math.ceil(yearsOfSaving * 12)
-  );
+  const monthlyGoal = goalAmount / (yearsOfSaving * 12);
+  const monthlyGoalDisplay = Math.ceil(monthlyGoal).toLocaleString();
 
   const updatedGoal: SavingGoalType = {
     ...goal,
     hasDeadline,
     name,
     goal: goalAmount,
-    timeInMonths: ceilToOneDecimal(yearsOfSaving * 12),
+    timeInMonths: Math.ceil(yearsOfSaving * 12),
   };
 
   return (
@@ -372,11 +361,11 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
             </div>
 
             <div className="flex w-full justify-end items-center gap-2">
-              <Label htmlFor="noDeadline" className="text-sm">
+              <Label htmlFor="hasDeadline" className="text-sm">
                 No deadline
               </Label>
               <Checkbox
-                id="noDeadline"
+                id="hasDeadline"
                 checked={!hasDeadline}
                 onCheckedChange={(checked) => setHasDeadline(!checked)}
               />
@@ -390,9 +379,7 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
                 />
                 <p>
                   You need to save:{" "}
-                  <span className="font-bold">
-                    {monthlyGoal.toLocaleString()}
-                  </span>{" "}
+                  <span className="font-bold">{monthlyGoalDisplay}</span>{" "}
                   SEK/month
                 </p>
               </>
@@ -407,7 +394,7 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
                   onChange={(e) => {
                     const monthlyGoal = Number(e.currentTarget.value);
                     if (monthlyGoal > 0) {
-                      const months = Math.ceil(goalAmount / monthlyGoal);
+                      const months = goalAmount / monthlyGoal;
                       setYearsOfSaving(months / 12);
                     }
                   }}

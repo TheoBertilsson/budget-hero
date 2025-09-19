@@ -41,7 +41,7 @@ export function MonthlySavingProgress() {
   const goalThisMonth = mainGoal?.monthly?.[year]?.[month]?.goal ?? 0;
 
   const monthlyProgress = goalThisMonth
-    ? Math.ceil((thisMonthSavings / goalThisMonth) * 100)
+    ? Math.round((thisMonthSavings / goalThisMonth) * 100)
     : 0;
 
   return (
@@ -87,7 +87,7 @@ export function TotalSavingsGoal() {
   const { mainGoal } = useSavingsGoal();
 
   const totalProgress = mainGoal?.goal
-    ? Math.ceil((mainGoal.total / mainGoal.goal) * 100)
+    ? Math.round((mainGoal.total / mainGoal.goal) * 100)
     : 0;
 
   return (
@@ -141,7 +141,7 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
             <CardContent className="flex flex-col py-2 gap-4 max-h-52 w-full">
               {subGoals.map((goal, i) => {
                 const progress = goal.goal
-                  ? Math.ceil((goal.total / goal.goal) * 100)
+                  ? Math.round((goal.total / goal.goal) * 100)
                   : 0;
                 return (
                   <div className="flex flex-col gap-1" key={i}>
