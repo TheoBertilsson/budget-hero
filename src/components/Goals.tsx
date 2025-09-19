@@ -69,6 +69,7 @@ export function SetupMainGoalCard() {
               <Input
                 id="savingsGoal"
                 type="number"
+                step={100}
                 onChange={(value) =>
                   setSavingsGoalState(Number(value.currentTarget.value))
                 }
@@ -123,6 +124,7 @@ export function SetupMainGoalCard() {
                     <Input
                       id="monthlyGoal"
                       type="number"
+                      step={100}
                       onChange={(value) =>
                         setMonthlySavingsGoal(Number(value.currentTarget.value))
                       }
@@ -228,6 +230,7 @@ export function SetupNewGoal({
                 <Input
                   id="savingsGoal"
                   type="number"
+                  step={100}
                   onChange={(value) =>
                     setSavingsGoalState(Number(value.currentTarget.value))
                   }
@@ -270,6 +273,7 @@ export function SetupNewGoal({
                       <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
                       <Input
                         id="monthlyGoal"
+                        step={100}
                         type="number"
                         onChange={(value) =>
                           setMonthlySavingsGoal(
@@ -324,7 +328,7 @@ export function SavingsSlider({
           value={[yearsOfSaving]}
           onValueChange={(val) => setYearsOfSaving(val[0])}
           max={65}
-          min={1}
+          min={0}
           step={1}
         />
       </div>
