@@ -218,7 +218,6 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     startMonth: number
   ) => {
     const user = getCurrentUser();
-
     if (!user) throw new Error("No user signed in");
 
     const savingGoalRef = doc(
@@ -231,28 +230,36 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       goalId
     );
     const snap = await getDoc(savingGoalRef);
-
-    if (!snap.exists()) throw new Error("Saving goals document does not exist");
+    if (!snap.exists()) throw new Error("Saving goal does not exist");
 
     const goal = snap.data() as SavingGoalType;
 
-    const newMonthlySavings: (typeof goals)[number]["monthly"] = {};
     let remainingGoal = totalGoal;
     let year = startYear;
     let month = startMonth;
 
+    // Clone existing monthly savings if available
+    const existingMonthly = goal.monthly ?? {};
+    const newMonthlySavings: SavingGoalType["monthly"] = { ...existingMonthly };
+
     for (let i = 0; i < numberOfMonths; i++) {
-      let monthlyGoal =
+      const monthKey = month.toString().padStart(2, "0");
+      const monthlyGoal =
         i === numberOfMonths - 1
           ? remainingGoal
-          : Math.floor(totalGoal / numberOfMonths);
-      if (!newMonthlySavings[year]) newMonthlySavings[year] = {};
-      newMonthlySavings[year][month.toString().padStart(2, "0")] = {
-        goal: monthlyGoal,
-        paid: 0,
-      };
-      remainingGoal -= monthlyGoal;
+          : Math.ceil(totalGoal / numberOfMonths);
 
+      if (!newMonthlySavings[year]) newMonthlySavings[year] = {};
+
+      // Preserve paid if exists, otherwise default to 0
+      const prevPaid = newMonthlySavings[year][monthKey]?.paid ?? 0;
+
+      newMonthlySavings[year][monthKey] = {
+        goal: monthlyGoal,
+        paid: prevPaid,
+      };
+
+      remainingGoal -= monthlyGoal;
       month++;
       if (month > 12) {
         month = 1;
@@ -260,26 +267,18 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Update the goal in the array
-    const updatedGoal = {
-      ...goal,
+    await updateDoc(savingGoalRef, {
       monthly: newMonthlySavings,
-    };
+    });
 
-    await setDoc(savingGoalRef, updatedGoal, { merge: true });
-
-    setGoalsState((prev) =>
-      prev.map((g) => (g.id === goalId ? { ...updatedGoal, id: goalId } : g))
-    );
+    return newMonthlySavings;
   };
 
-  const updateGoal = async (
-    goal: SavingGoalType,
-    id: string,
-    monthlyGoal?: number
-  ) => {
+  const updateGoal = async (updatedGoal: SavingGoalType, id: string) => {
     const user = getCurrentUser();
     if (!user) throw new Error("No user signed in");
+
+    console.log(updatedGoal.timeInMonths);
 
     setLoading(true);
 
@@ -292,7 +291,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       "goals"
     );
 
-    if (goal.type === "main") {
+    if (updatedGoal.type === "main") {
       const q = query(savingsCollection, where("type", "==", "main"));
       const querySnap = await getDocs(q);
 
@@ -309,24 +308,21 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       );
     }
 
-    let calculatedTime = goal.timeInMonths;
-    if (monthlyGoal) {
-      calculatedTime =
-        !goal.timeInMonths && monthlyGoal
-          ? Math.ceil(goal.goal / monthlyGoal)
-          : goal.timeInMonths || 0;
-    }
-
-    const updatedGoal = {
-      ...goal,
-      timeInMonths: calculatedTime,
-    };
-
     const goalRef = doc(savingsCollection, id);
     await updateDoc(goalRef, updatedGoal);
 
+    const newMonthly = await setMonthlySavingsGoal(
+      updatedGoal.id,
+      updatedGoal.goal,
+      updatedGoal.timeInMonths,
+      Number(year),
+      Number(month)
+    );
+
     setGoalsState((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, ...updatedGoal } : g))
+      prev.map((g) =>
+        g.id === id ? { ...g, ...updatedGoal, monthly: newMonthly } : g
+      )
     );
 
     setLoading(false);

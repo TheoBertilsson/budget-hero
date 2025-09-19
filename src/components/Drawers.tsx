@@ -126,7 +126,6 @@ export function AddExpenseDrawer() {
                     className="text-7xl font-bold tracking-tighter"
                     placeholder="0"
                     type="number"
-                    step={100}
                     min={0}
                     value={price || ""}
                     onChange={(e) => setPrice(Number(e.currentTarget.value))}
@@ -236,7 +235,6 @@ export function AddIncomeDrawer() {
                     className="text-7xl font-bold tracking-tighter"
                     placeholder="0"
                     type="number"
-                    step={100}
                     min={0}
                     value={price || ""}
                     onChange={(e) => setPrice(Number(e.currentTarget.value))}
@@ -369,7 +367,6 @@ export function AddSavingDrawer() {
                     className="text-7xl font-bold tracking-tighter"
                     placeholder="0"
                     type="number"
-                    step={100}
                     min={0}
                     value={price || ""}
                     onChange={(e) => setPrice(Number(e.currentTarget.value))}

@@ -39,3 +39,7 @@ export function absoluteUrl(path: string) {
     ? `http://localhost:3000${path}`
     : `https://${config.appUrl}${path}`;
 }
+
+export function ceilToOneDecimal(value: number) {
+  return Math.ceil(value * 10) / 10;
+}

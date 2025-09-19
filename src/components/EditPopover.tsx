@@ -16,6 +16,7 @@ import { SavingsSlider, SubOrMainGoal } from "./Goals";
 import { Checkbox } from "./ui/checkbox";
 import { useDate } from "@/lib/stores/DateContext";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
+import { ceilToOneDecimal } from "@/lib/utils";
 
 type EditPopoverType = {
   type: "expense" | "save" | "income";
@@ -42,73 +43,84 @@ export function EditPopover({
     updateIncomes,
     updateSaves,
   } = useFinance();
+
   const [categoryState, setCategoryState] = useState<string>(category || "");
   const [nameState, setNameState] = useState(name);
   const [priceState, setPriceState] = useState(price);
   const [open, setOpen] = useState(false);
 
-  const removeItem = (type: "expense" | "save" | "income", index: number) => {
+  useEffect(() => {
+    setCategoryState(category || "");
+    setNameState(name);
+    setPriceState(price);
+  }, [category, name, price]);
+
+  const removeItem = () => {
+    if (type === "expense") removeExpense(index);
+    else if (type === "save") removeSave(index);
+    else if (type === "income") removeIncome(index);
+    setOpen(false);
+  };
+
+  const updateItem = () => {
     if (type === "expense") {
-      removeExpense(index);
-      setCategoryState("");
-    } else if (type === "save") {
-      removeSave(index);
-    } else if (type === "income") {
-      removeIncome(index);
-    }
-    setOpen(false);
-  };
-  const updateItem = (item: Save | Income | Expense, index: number) => {
-    if ("category" in item) {
-      updateExpenses(index, item);
-      setCategoryState("");
-    } else if ("goal" in item) {
-      updateSaves(index, item);
+      const updated: Expense = {
+        name: nameState,
+        price: priceState,
+        category: categoryState,
+      };
+      updateExpenses(index, updated);
+    } else if (type === "save" && goalId) {
+      const updated: Save = {
+        goal: nameState,
+        price: priceState,
+        goalId,
+      };
+      updateSaves(index, updated);
     } else {
-      updateIncomes(index, item);
+      const updated: Income = { name: nameState, price: priceState };
+      updateIncomes(index, updated);
     }
     setOpen(false);
   };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant={"ghost"}
-          className="size-4 rounded-xs has-[>svg]:px-0 cursor-pointer"
-        >
+        <Button variant="ghost" className="size-4 rounded-xs cursor-pointer">
           <EllipsisVerticalIcon />
         </Button>
       </PopoverTrigger>
+
       <PopoverContent className="w-80 flex flex-col gap-4 shadow-2xl">
         <div className="grid gap-4">
           <div className="space-y-2">
             <h4 className="leading-none font-medium">Edit {type}</h4>
-            {/* <p className="text-muted-foreground text-sm">
-                Edit
-            </p> */}
           </div>
+
           <div className="grid gap-2">
             <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="name">Name:</Label>
               <Input
                 id="name"
-                defaultValue={name}
-                onChange={(value) => setNameState(value.currentTarget.value)}
+                value={nameState}
+                onChange={(e) => setNameState(e.currentTarget.value)}
                 className="col-span-2 h-8"
               />
             </div>
+
             <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="price">Price:</Label>
               <Input
                 id="price"
-                defaultValue={price}
-                onChange={(value) =>
-                  setPriceState(Number(value.currentTarget.value))
-                }
+                type="number"
+                value={priceState}
+                onChange={(e) => setPriceState(Number(e.currentTarget.value))}
                 className="col-span-2 h-8"
               />
             </div>
-            {category && (
+
+            {category !== undefined && (
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label htmlFor="category">Category:</Label>
                 <CategoryBox
@@ -119,31 +131,17 @@ export function EditPopover({
             )}
           </div>
         </div>
+
         <div className="flex w-full justify-between items-center">
           <Button
-            variant={"destructive"}
-            className="bg-red-600 has-[>svg]:px-0 size-8"
-            onClick={() => removeItem(type, index)}
+            variant="destructive"
+            className="bg-red-600 size-8"
+            onClick={removeItem}
           >
             <TrashIcon />
           </Button>
-          <Button
-            variant={"secondary"}
-            onClick={() => {
-              updateItem(
-                category
-                  ? ({
-                      name: nameState,
-                      price: priceState,
-                      category,
-                    } as Expense)
-                  : type === "save" && !category && goalId
-                  ? ({ goal: nameState, price: priceState, goalId } as Save)
-                  : ({ name: nameState, price: priceState } as Income),
-                index
-              );
-            }}
-          >
+
+          <Button variant="secondary" onClick={updateItem}>
             Save
           </Button>
         </div>
@@ -155,25 +153,26 @@ export function EditPopover({
 export function EditGoals({ goal }: { goal: SavingGoalType }) {
   const { year, month } = useDate();
   const { removeGoal, updateGoal } = useSavingsGoal();
-  const [hasDeadlineState, setHasDeadlineState] = useState(goal.hasDeadline);
+
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState(goal.name);
   const [goalState, setGoalState] = useState(goal.goal);
-  const [monthlySavingsGoal, setMonthlySavingsGoal] = useState(
-    goal?.monthly?.[year]?.[month]?.goal ?? 0
-  );
   const [type, setType] = useState(goal.type);
-  const [open, setOpen] = useState(false);
   const [yearsOfSaving, setYearsOfSaving] = useState(
     Math.ceil(goal.timeInMonths / 12)
   );
+  const [monthlySavingsGoal, setMonthlySavingsGoal] = useState(
+    goal?.monthly?.[year]?.[month]?.goal ?? 0
+  );
+  const [noDeadline, setNoDeadline] = useState(!goal.hasDeadline);
 
   useEffect(() => {
-    setHasDeadlineState(goal.hasDeadline);
     setName(goal.name);
     setGoalState(goal.goal);
-    setMonthlySavingsGoal(goal?.monthly?.[year]?.[month]?.goal ?? 0);
     setType(goal.type);
     setYearsOfSaving(Math.ceil(goal.timeInMonths / 12));
+    setMonthlySavingsGoal(goal?.monthly?.[year]?.[month]?.goal ?? 0);
+    setNoDeadline(!goal.hasDeadline);
   }, [goal, year, month]);
 
   const monthlyGoal = Math.ceil(goalState / (yearsOfSaving * 12));
@@ -181,10 +180,10 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
 
   const updatedGoal = {
     ...goal,
-    hasDeadline: hasDeadlineState,
-    goal: goalState,
     name,
+    goal: goalState,
     type,
+    hasDeadline: !noDeadline,
     timeInMonths: yearsOfSaving * 12,
   };
 
@@ -192,7 +191,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant={"ghost"}
+          variant="ghost"
           className="size-4 rounded-xs has-[>svg]:px-0 cursor-pointer"
         >
           <EllipsisVerticalIcon />
@@ -202,33 +201,33 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
         <div className="grid gap-4">
           <div className="space-y-2">
             <h4 className="leading-none font-medium">Edit goal</h4>
-            {/* <p className="text-muted-foreground text-sm">
-                Edit
-            </p> */}
           </div>
+
           <div className="grid gap-2">
             <SubOrMainGoal setGoalType={setType} />
+
             <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="name">Name:</Label>
               <Input
                 id="name"
-                defaultValue={name}
-                onChange={(value) => setName(value.currentTarget.value)}
+                value={name}
+                onChange={(e) => setName(e.currentTarget.value)}
                 className="col-span-2 h-8"
               />
             </div>
+
             <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="goal">Goal:</Label>
               <Input
                 id="goal"
-                defaultValue={goalState}
-                onChange={(value) =>
-                  setGoalState(Number(value.currentTarget.value))
-                }
+                value={goalState}
+                type="number"
+                onChange={(e) => setGoalState(Number(e.currentTarget.value))}
                 className="col-span-2 h-8"
               />
             </div>
           </div>
+
           <div className="grid gap-2">
             <div className="flex w-full justify-end items-center gap-2">
               <Label htmlFor="noDeadline" className="text-sm">
@@ -236,48 +235,45 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
               </Label>
               <Checkbox
                 id="noDeadline"
-                checked={!hasDeadlineState}
-                onCheckedChange={(checked) =>
-                  setHasDeadlineState(checked === true)
-                }
+                checked={noDeadline}
+                onCheckedChange={(checked) => setNoDeadline(checked === true)}
               />
             </div>
-            {hasDeadlineState ? (
+
+            {noDeadline ? (
+              <div className="grid gap-2">
+                <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+                <Input
+                  id="monthlyGoal"
+                  type="number"
+                  min={0}
+                  placeholder="1 000 000"
+                  value={monthlySavingsGoal}
+                  onChange={(e) =>
+                    setMonthlySavingsGoal(Number(e.currentTarget.value))
+                  }
+                  required
+                />
+              </div>
+            ) : (
               <>
                 <SavingsSlider
-                  setYearsOfSaving={setYearsOfSaving}
                   yearsOfSaving={yearsOfSaving}
+                  setYearsOfSaving={setYearsOfSaving}
                 />
-                <p className="">
+                <p>
                   You need to save:{" "}
                   <span className="font-bold">{monthlyGoalDisplay}</span>{" "}
                   SEK/month
                 </p>
               </>
-            ) : (
-              <>
-                <div className="grid gap-2">
-                  <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
-                  <Input
-                    id="monthlyGoal"
-                    step={100}
-                    type="number"
-                    onChange={(value) =>
-                      setMonthlySavingsGoal(Number(value.currentTarget.value))
-                    }
-                    min={0}
-                    name="monthlyGoal"
-                    placeholder="1 000 000"
-                    required
-                  />
-                </div>
-              </>
             )}
           </div>
         </div>
+
         <div className="flex w-full justify-between items-center">
           <Button
-            variant={"destructive"}
+            variant="destructive"
             className="bg-red-600 has-[>svg]:px-0 size-8"
             onClick={() => {
               removeGoal(goal.id);
@@ -286,15 +282,160 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
           >
             <TrashIcon />
           </Button>
+
           <Button
-            variant={"secondary"}
+            variant="secondary"
             onClick={() => {
               setOpen(false);
               updateGoal(
                 updatedGoal,
                 goal.id,
-                monthlySavingsGoal ? monthlySavingsGoal : undefined
+                noDeadline ? monthlySavingsGoal : undefined
               );
+            }}
+          >
+            Save
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
+  const { year, month } = useDate();
+  const { removeGoal, updateGoal } = useSavingsGoal();
+
+  const [hasDeadline, setHasDeadline] = useState(goal.hasDeadline);
+  const [name, setName] = useState(goal.name);
+  const [goalAmount, setGoalAmount] = useState(goal.goal);
+
+  const [yearsOfSaving, setYearsOfSaving] = useState(
+    Math.ceil(goal.timeInMonths / 12)
+  );
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setHasDeadline(goal.hasDeadline);
+    setName(goal.name);
+    setGoalAmount(goal.goal);
+    setYearsOfSaving(Math.ceil(goal.timeInMonths / 12));
+  }, [goal, year, month]);
+
+  const monthlyGoal = Math.ceil(goalAmount / (yearsOfSaving * 12));
+  console.log(
+    yearsOfSaving + " + " + monthlyGoal + " = " + Math.ceil(yearsOfSaving * 12)
+  );
+
+  const updatedGoal: SavingGoalType = {
+    ...goal,
+    hasDeadline,
+    name,
+    goal: goalAmount,
+    timeInMonths: ceilToOneDecimal(yearsOfSaving * 12),
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" className="size-4 rounded-xs cursor-pointer">
+          <EllipsisVerticalIcon />
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent className="w-80 flex flex-col gap-4 shadow-2xl">
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <h4 className="leading-none font-medium">Edit goal</h4>
+          </div>
+
+          <div className="grid gap-2">
+            <div className="grid grid-cols-3 items-center gap-4">
+              <Label htmlFor="name">Name:</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.currentTarget.value)}
+                className="col-span-2 h-8"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 items-center gap-4">
+              <Label htmlFor="goal">Goal:</Label>
+              <Input
+                id="goal"
+                type="number"
+                value={goalAmount}
+                onChange={(e) => setGoalAmount(Number(e.currentTarget.value))}
+                className="col-span-2 h-8"
+              />
+            </div>
+
+            <div className="flex w-full justify-end items-center gap-2">
+              <Label htmlFor="noDeadline" className="text-sm">
+                No deadline
+              </Label>
+              <Checkbox
+                id="noDeadline"
+                checked={!hasDeadline}
+                onCheckedChange={(checked) => setHasDeadline(!checked)}
+              />
+            </div>
+
+            {hasDeadline ? (
+              <>
+                <SavingsSlider
+                  setYearsOfSaving={setYearsOfSaving}
+                  yearsOfSaving={yearsOfSaving}
+                />
+                <p>
+                  You need to save:{" "}
+                  <span className="font-bold">
+                    {monthlyGoal.toLocaleString()}
+                  </span>{" "}
+                  SEK/month
+                </p>
+              </>
+            ) : (
+              <div className="grid gap-2">
+                <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+                <Input
+                  id="monthlyGoal"
+                  type="number"
+                  min={0}
+                  defaultValue={updatedGoal.monthly[year][month].goal}
+                  onChange={(e) => {
+                    const monthlyGoal = Number(e.currentTarget.value);
+                    if (monthlyGoal > 0) {
+                      const months = Math.ceil(goalAmount / monthlyGoal);
+                      setYearsOfSaving(months / 12);
+                    }
+                  }}
+                  placeholder="1 000 000"
+                  required
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex w-full justify-between items-center">
+          <Button
+            variant="destructive"
+            className="bg-red-600 size-8"
+            onClick={() => {
+              removeGoal(goal.id);
+              setOpen(false);
+            }}
+          >
+            <TrashIcon />
+          </Button>
+
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setOpen(false);
+              updateGoal(updatedGoal, goal.id);
             }}
           >
             Save

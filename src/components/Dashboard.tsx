@@ -8,7 +8,7 @@ import ConfettiExplosion from "react-confetti-explosion";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { capitalize } from "@/lib/utils";
 import { ScrollArea } from "./ui/scroll-area";
-import { EditGoals, EditPopover } from "./EditPopover";
+import { EditGoals, EditMainGoal, EditPopover } from "./EditPopover";
 import { AddExpenseDrawer, AddIncomeDrawer, AddSavingDrawer } from "./Drawers";
 
 export function SummaryCard() {
@@ -92,35 +92,40 @@ export function TotalSavingsGoal() {
 
   return (
     <>
-      <Card className="w-full h-full flex flex-col gap-0">
-        <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
-          <div className=" text-xs font-semibold flex justify-between">
-            <p>{mainGoal?.name.toLocaleString()}</p>
-            <p>{mainGoal?.goal.toLocaleString()}</p>
-          </div>
-          <div className="flex justify-center items-center">
-            <Progress
-              value={totalProgress > 100 ? 100 : totalProgress}
-              className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-green-600 [&>div]:to-green-400 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
-              id="monthlyProgress"
-            />
-            {totalProgress >= 100 && (
-              <ConfettiExplosion className="" duration={5000} />
-            )}
-          </div>
-          <p className="text-sm leading-6">
-            You have saved a total of{" "}
-            <span className="font-bold">
-              {mainGoal?.total?.toLocaleString() || 0}
-            </span>{" "}
-            SEK!
-            <br /> That is <span className="font-bold">
-              {totalProgress}%
-            </span>{" "}
-            of your goal!
-          </p>
-        </CardContent>
-      </Card>
+      {mainGoal && (
+        <Card className="w-full h-full flex flex-col gap-0">
+          <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
+            <div className=" text-xs font-semibold flex justify-between">
+              <p>{mainGoal?.name.toLocaleString()}</p>
+              <div className="flex gap-1 items-center">
+                <p>{capitalize(mainGoal?.goal.toLocaleString() || "")}</p>
+                <EditMainGoal goal={mainGoal} />
+              </div>
+            </div>
+            <div className="flex justify-center items-center">
+              <Progress
+                value={totalProgress > 100 ? 100 : totalProgress}
+                className="w-full mx-auto h-4 [&>div]:bg-linear-to-r [&>div]:from-green-600 [&>div]:to-green-400 [&>div]:rounded-l-full [&>div]:transition-all [&>div]:duration-700"
+                id="monthlyProgress"
+              />
+              {totalProgress >= 100 && (
+                <ConfettiExplosion className="" duration={5000} />
+              )}
+            </div>
+            <p className="text-sm leading-6">
+              You have saved a total of{" "}
+              <span className="font-bold">
+                {mainGoal?.total?.toLocaleString() || 0}
+              </span>{" "}
+              SEK!
+              <br /> That is <span className="font-bold">
+                {totalProgress}%
+              </span>{" "}
+              of your goal!
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </>
   );
 }
