@@ -254,8 +254,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
     await updateDoc(financeRef, { savings: updatedSaves });
 
-    console.log(monthlyGoal.paid + " snopp " + totalPaid);
-
     updateGoal(updatedGoal, updatedGoal.id);
     setFinanceState((prev) =>
       prev ? { ...prev, savings: updatedSaves } : prev
