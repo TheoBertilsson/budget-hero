@@ -293,6 +293,7 @@ export function SavingsBox() {
                         price={save.price}
                         name={save.goal}
                         index={i}
+                        goalId={save.goalId}
                       />
                     </div>
                   </div>

@@ -334,16 +334,39 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (!snap.exists()) throw new Error("Finance document not found");
 
     const data = snap.data() as MonthlyFinance;
-    const savings = data.savings || [];
+    const save = data.savings[index];
 
-    if (index < 0 || index >= savings.length) {
+    const goal = goals.find((goal) => goal.id === save.goalId);
+    if (!goal) throw new Error("No goal found");
+    const monthlyGoal = goal.monthly[year][month];
+
+    if (!monthlyGoal) throw new Error("Monthly goal not found");
+    const totalMonthlyPaid = monthlyGoal.paid - save.price + updatedSave.price;
+    const totalPaid = goal.total - save.price + updatedSave.price;
+
+    if (index < 0 || index >= data.savings.length) {
       throw new Error("Invalid income index");
     }
 
+    const updatedGoal: SavingGoalType = {
+      ...goal,
+      total: totalPaid,
+      monthly: {
+        ...goal.monthly,
+        [year]: {
+          ...goal.monthly?.[year],
+          [month]: {
+            ...monthlyGoal,
+            paid: totalMonthlyPaid,
+          },
+        },
+      },
+    };
     const updatedSavings = [...savings];
     updatedSavings[index] = updatedSave;
 
-    await updateDoc(financeRef, { incomes: updatedSavings });
+    await updateDoc(financeRef, { savings: updatedSavings });
+    updateGoal(updatedGoal, updatedGoal.id);
 
     setFinanceState((prev) =>
       prev ? { ...prev, savings: updatedSavings } : prev

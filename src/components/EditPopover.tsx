@@ -19,6 +19,7 @@ type EditPopoverType = {
   name: string;
   index: number;
   category?: string;
+  goalId?: string;
 };
 
 export function EditPopover({
@@ -27,6 +28,7 @@ export function EditPopover({
   name,
   index,
   category,
+  goalId,
 }: EditPopoverType) {
   const {
     removeExpense,
@@ -131,8 +133,8 @@ export function EditPopover({
                       price: priceState,
                       category,
                     } as Expense)
-                  : type === "save" && !category
-                  ? ({ goal: nameState, price: priceState } as Save)
+                  : type === "save" && !category && goalId
+                  ? ({ goal: nameState, price: priceState, goalId } as Save)
                   : ({ name: nameState, price: priceState } as Income),
                 index
               );
