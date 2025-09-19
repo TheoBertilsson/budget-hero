@@ -235,17 +235,19 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const monthlyGoal = goal.monthly[year][month];
 
     if (!monthlyGoal) throw new Error("Monthly goal not found");
-    const totalPaid = monthlyGoal.paid - save.price;
+    const totalMonthlyPaid = monthlyGoal.paid - save.price;
+    const totalPaid = goal.total - save.price;
 
     const updatedGoal: SavingGoalType = {
       ...goal,
+      total: totalPaid,
       monthly: {
         ...goal.monthly,
         [year]: {
           ...goal.monthly?.[year],
           [month]: {
             ...monthlyGoal,
-            paid: totalPaid,
+            paid: totalMonthlyPaid,
           },
         },
       },
