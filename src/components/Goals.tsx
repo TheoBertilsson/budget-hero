@@ -9,7 +9,7 @@ import {
 import { Label } from "@radix-ui/react-label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Slider } from "./ui/slider";
 import { Checkbox } from "./ui/checkbox";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
@@ -170,12 +170,15 @@ export function SetupNewGoal({
   const [goalType, setGoalType] = useState<"sub" | "main">("sub");
   const [savingsGoalState, setSavingsGoalState] = useState(0);
   const calculatedMonthlySavingsGoal = savingsGoalState / (yearsOfSaving * 12);
-  const calculatedMonthlySavingsGoalDisplay =
-    calculatedMonthlySavingsGoal.toLocaleString();
+  const calculatedMonthlySavingsGoalDisplay = Math.ceil(
+    calculatedMonthlySavingsGoal
+  ).toLocaleString();
   const [monthlySavingsGoal, setMonthlySavingsGoal] = useState(0);
   const [noDeadline, setNoDeadline] = useState(false);
 
-  async function handleSubmit() {
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setShow(false);
     try {
       if (noDeadline) {
         addSavingsGoal({
@@ -223,8 +226,7 @@ export function SetupNewGoal({
               className="flex flex-col gap-6"
               id="newGoalForm"
               onSubmit={(event) => {
-                event.preventDefault();
-                handleSubmit();
+                handleSubmit(event);
               }}
             >
               <SubOrMainGoal setGoalType={setGoalType} />
