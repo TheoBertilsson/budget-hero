@@ -122,8 +122,7 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
     const docRef = await addDoc(savingsCollection, newGoal);
     await setDoc(docRef, { id: docRef.id }, { merge: true });
 
-    setGoalsState((prev) => [...prev, { ...newGoal, id: docRef.id }]);
-    await setMonthlySavingsGoal(
+    const monthlySavings = await setMonthlySavingsGoal(
       docRef.id,
       params.goal,
       calculatedTime,
@@ -131,6 +130,10 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       Number(month),
       monthlyGoal
     );
+    setGoalsState((prev) => [
+      ...prev,
+      { ...newGoal, id: docRef.id, monthly: monthlySavings },
+    ]);
 
     setLoading(false);
   };

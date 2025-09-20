@@ -63,7 +63,14 @@ export function SetupMainGoalCard() {
           <CardDescription>Add a goal with or without deadline</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-6">
+          <form
+            className="flex flex-col gap-6"
+            id="newMainGoalForm"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+          >
             <div className="grid gap-2">
               <Label htmlFor="savingsGoal">Savings Goal</Label>
               <Input
@@ -135,10 +142,15 @@ export function SetupMainGoalCard() {
                 </>
               )}
             </div>
-          </div>
+          </form>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button className="w-full" onClick={handleSubmit} disabled={loading}>
+          <Button
+            className="w-full"
+            type="submit"
+            form="newMainGoalForm"
+            disabled={loading}
+          >
             {loading ? "Please wait..." : "Start the planning"}
           </Button>
         </CardFooter>
@@ -207,7 +219,14 @@ export function SetupNewGoal({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col gap-6">
+            <form
+              className="flex flex-col gap-6"
+              id="newGoalForm"
+              onSubmit={(event) => {
+                event.preventDefault();
+                handleSubmit();
+              }}
+            >
               <SubOrMainGoal setGoalType={setGoalType} />
               <div className="grid gap-2">
                 <Label htmlFor="goalName">Name</Label>
@@ -282,15 +301,13 @@ export function SetupNewGoal({
                   </>
                 )}
               </div>
-            </div>
+            </form>
           </CardContent>
           <CardFooter className="flex-col gap-2">
             <Button
               className="w-full"
-              onClick={() => {
-                handleSubmit();
-                setShow(false);
-              }}
+              type="submit"
+              form="newGoalForm"
               disabled={loading}
             >
               {loading ? "Please wait..." : "Add new goal"}
