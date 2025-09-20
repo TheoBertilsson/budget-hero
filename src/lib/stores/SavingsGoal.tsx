@@ -247,15 +247,6 @@ export function SavingsProvider({ children }: { children: ReactNode }) {
       new Date(startYear, startMonth, 1)
     );
 
-    console.log(
-      numberOfMonths +
-        " + " +
-        countMonths(pastMonths) +
-        " = " +
-        (numberOfMonths - countMonths(pastMonths) + 1)
-    );
-    console.log(pastMonths);
-
     let remainingGoal = totalGoal;
     let year = startYear;
     let month = startMonth;

@@ -196,77 +196,89 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
           <div className="space-y-2">
             <h4 className="leading-none font-medium">Edit goal</h4>
           </div>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              setOpen(false);
+              updateGoal(
+                updatedGoal,
+                goal.id,
+                hasDeadline ? undefined : monthlyGoal
+              );
+            }}
+            id="editGoalsForm"
+          >
+            <div className="grid gap-2">
+              <SubOrMainGoal setGoalType={setType} />
 
-          <div className="grid gap-2">
-            <SubOrMainGoal setGoalType={setType} />
-
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="name">Name:</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.currentTarget.value)}
-                className="col-span-2 h-8"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="goal">Goal:</Label>
-              <Input
-                id="goal"
-                value={goalState}
-                type="number"
-                onChange={(e) => setGoalState(Number(e.currentTarget.value))}
-                className="col-span-2 h-8"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-2">
-            <div className="flex w-full justify-end items-center gap-2">
-              <Label htmlFor="hasDeadline" className="text-sm">
-                No deadline
-              </Label>
-              <Checkbox
-                id="hasDeadline"
-                checked={!hasDeadline}
-                onCheckedChange={(checked) => setHasDeadline(!checked)}
-              />
-            </div>
-
-            {hasDeadline ? (
-              <>
-                <SavingsSlider
-                  yearsOfSaving={yearsOfSaving}
-                  setYearsOfSaving={setYearsOfSaving}
-                />
-                <p>
-                  You need to save:{" "}
-                  <span className="font-bold">{monthlyGoalDisplay}</span>{" "}
-                  SEK/month
-                </p>
-              </>
-            ) : (
-              <div className="grid gap-2">
-                <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label htmlFor="name">Name:</Label>
                 <Input
-                  id="monthlyGoal"
-                  type="number"
-                  min={0}
-                  placeholder="1 000 000"
-                  defaultValue={updatedGoal.monthly[year][month].goal}
-                  onChange={(e) => {
-                    const monthlyGoal = Number(e.currentTarget.value);
-                    if (monthlyGoal > 0) {
-                      const months = goalState / monthlyGoal;
-                      setYearsOfSaving(months / 12);
-                    }
-                  }}
-                  required
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.currentTarget.value)}
+                  className="col-span-2 h-8"
                 />
               </div>
-            )}
-          </div>
+
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label htmlFor="goal">Goal:</Label>
+                <Input
+                  id="goal"
+                  defaultValue={goalState}
+                  type="number"
+                  onChange={(e) => setGoalState(Number(e.currentTarget.value))}
+                  className="col-span-2 h-8"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <div className="flex w-full justify-end items-center gap-2">
+                <Label htmlFor="hasDeadline" className="text-sm">
+                  No deadline
+                </Label>
+                <Checkbox
+                  id="hasDeadline"
+                  checked={!hasDeadline}
+                  onCheckedChange={(checked) => setHasDeadline(!checked)}
+                />
+              </div>
+
+              {hasDeadline ? (
+                <>
+                  <SavingsSlider
+                    yearsOfSaving={yearsOfSaving}
+                    setYearsOfSaving={setYearsOfSaving}
+                  />
+                  <p>
+                    You need to save:{" "}
+                    <span className="font-bold">{monthlyGoalDisplay}</span>{" "}
+                    SEK/month
+                  </p>
+                </>
+              ) : (
+                <div className="grid gap-2">
+                  <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+                  <Input
+                    id="monthlyGoal"
+                    type="number"
+                    min={0}
+                    placeholder="1 000 000"
+                    defaultValue={updatedGoal.monthly[year][month].goal}
+                    onChange={(e) => {
+                      const monthlyGoal = Number(e.currentTarget.value);
+                      if (monthlyGoal > 0) {
+                        const months = goalState / monthlyGoal;
+                        setYearsOfSaving(months / 12);
+                      }
+                    }}
+                    required
+                  />
+                </div>
+              )}
+            </div>
+          </form>
         </div>
 
         <div className="flex w-full justify-between items-center">
@@ -281,17 +293,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
             <TrashIcon />
           </Button>
 
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setOpen(false);
-              updateGoal(
-                updatedGoal,
-                goal.id,
-                hasDeadline ? undefined : monthlyGoal
-              );
-            }}
-          >
+          <Button form="editGoalsForm" variant="secondary" type="submit">
             Save
           </Button>
         </div>
@@ -341,73 +343,85 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
           <div className="space-y-2">
             <h4 className="leading-none font-medium">Edit goal</h4>
           </div>
-
-          <div className="grid gap-2">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="name">Name:</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.currentTarget.value)}
-                className="col-span-2 h-8"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="goal">Goal:</Label>
-              <Input
-                id="goal"
-                type="number"
-                value={goalAmount}
-                onChange={(e) => setGoalAmount(Number(e.currentTarget.value))}
-                className="col-span-2 h-8"
-              />
-            </div>
-
-            <div className="flex w-full justify-end items-center gap-2">
-              <Label htmlFor="hasDeadline" className="text-sm">
-                No deadline
-              </Label>
-              <Checkbox
-                id="hasDeadline"
-                checked={!hasDeadline}
-                onCheckedChange={(checked) => setHasDeadline(!checked)}
-              />
-            </div>
-
-            {hasDeadline ? (
-              <>
-                <SavingsSlider
-                  setYearsOfSaving={setYearsOfSaving}
-                  yearsOfSaving={yearsOfSaving}
-                />
-                <p>
-                  You need to save:{" "}
-                  <span className="font-bold">{monthlyGoalDisplay}</span>{" "}
-                  SEK/month
-                </p>
-              </>
-            ) : (
-              <div className="grid gap-2">
-                <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+          <form
+            id="editMainGoalForm"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setOpen(false);
+              updateGoal(
+                updatedGoal,
+                goal.id,
+                hasDeadline ? undefined : monthlyGoal
+              );
+            }}
+          >
+            <div className="grid gap-2">
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label htmlFor="name">Name:</Label>
                 <Input
-                  id="monthlyGoal"
-                  type="number"
-                  min={0}
-                  defaultValue={updatedGoal.monthly[year][month].goal}
-                  onChange={(e) => {
-                    const monthlyGoal = Number(e.currentTarget.value);
-                    if (monthlyGoal > 0) {
-                      const months = goalAmount / monthlyGoal;
-                      setYearsOfSaving(months / 12);
-                    }
-                  }}
-                  placeholder="1 000 000"
-                  required
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.currentTarget.value)}
+                  className="col-span-2 h-8"
                 />
               </div>
-            )}
-          </div>
+
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label htmlFor="goal">Goal:</Label>
+                <Input
+                  id="goal"
+                  type="number"
+                  defaultValue={goalAmount}
+                  onChange={(e) => setGoalAmount(Number(e.currentTarget.value))}
+                  className="col-span-2 h-8"
+                />
+              </div>
+
+              <div className="flex w-full justify-end items-center gap-2">
+                <Label htmlFor="hasDeadline" className="text-sm">
+                  No deadline
+                </Label>
+                <Checkbox
+                  id="hasDeadline"
+                  checked={!hasDeadline}
+                  onCheckedChange={(checked) => setHasDeadline(!checked)}
+                />
+              </div>
+
+              {hasDeadline ? (
+                <>
+                  <SavingsSlider
+                    setYearsOfSaving={setYearsOfSaving}
+                    yearsOfSaving={yearsOfSaving}
+                  />
+                  <p>
+                    You need to save:{" "}
+                    <span className="font-bold">{monthlyGoalDisplay}</span>{" "}
+                    SEK/month
+                  </p>
+                </>
+              ) : (
+                <div className="grid gap-2">
+                  <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+                  <Input
+                    id="monthlyGoal"
+                    type="number"
+                    min={0}
+                    defaultValue={updatedGoal.monthly[year][month].goal}
+                    onChange={(e) => {
+                      const monthlyGoal = Number(e.currentTarget.value);
+                      if (monthlyGoal > 0) {
+                        const months = goalAmount / monthlyGoal;
+                        setYearsOfSaving(months / 12);
+                      }
+                    }}
+                    placeholder="1 000 000"
+                    required
+                  />
+                </div>
+              )}
+            </div>
+          </form>
         </div>
 
         <div className="flex w-full justify-between items-center">
@@ -422,17 +436,7 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
             <TrashIcon />
           </Button>
 
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setOpen(false);
-              updateGoal(
-                updatedGoal,
-                goal.id,
-                hasDeadline ? undefined : monthlyGoal
-              );
-            }}
-          >
+          <Button type="submit" form="editMainGoalForm" variant="secondary">
             Save
           </Button>
         </div>
