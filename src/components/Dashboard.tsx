@@ -96,9 +96,9 @@ export function TotalSavingsGoal() {
         <Card className="w-full h-full flex flex-col gap-0">
           <CardContent className="flex flex-col gap-2 pb-2 justify-center  h-full ">
             <div className=" text-xs font-semibold flex justify-between">
-              <p>{mainGoal?.name.toLocaleString()}</p>
+              <p>{capitalize(mainGoal?.name)}</p>
               <div className="flex gap-1 items-center">
-                <p>{capitalize(mainGoal?.goal.toLocaleString() || "")}</p>
+                <p>{mainGoal?.goal.toLocaleString() || ""}</p>
                 <EditMainGoal goal={mainGoal} />
               </div>
             </div>
@@ -146,7 +146,7 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
                 return (
                   <div className="flex flex-col gap-1" key={i}>
                     <div className=" text-xs font-semibold flex justify-between">
-                      <p>{goal.name.toLocaleString()}</p>
+                      <p>{capitalize(goal.name)}</p>
 
                       <div className="flex gap-1 items-center">
                         <p>{goal.goal.toLocaleString()}</p>
