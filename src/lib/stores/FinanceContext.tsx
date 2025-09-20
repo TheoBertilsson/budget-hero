@@ -245,7 +245,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
     await updateDoc(financeRef, { savings: updatedSaves });
 
-    updateGoal(updatedGoal, updatedGoal.id);
+    updateGoal(
+      updatedGoal,
+      updatedGoal.id,
+      !updatedGoal.hasDeadline
+        ? updatedGoal.monthly[year][month].goal
+        : undefined
+    );
     setFinanceState((prev) =>
       prev ? { ...prev, savings: updatedSaves } : prev
     );
@@ -349,7 +355,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     updatedSavings[index] = updatedSave;
 
     await updateDoc(financeRef, { savings: updatedSavings });
-    updateGoal(updatedGoal, updatedGoal.id);
+    updateGoal(
+      updatedGoal,
+      updatedGoal.id,
+      !updatedGoal.hasDeadline
+        ? updatedGoal.monthly[year][month].goal
+        : undefined
+    );
 
     setFinanceState((prev) =>
       prev ? { ...prev, savings: updatedSavings } : prev
