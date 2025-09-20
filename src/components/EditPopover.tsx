@@ -103,7 +103,7 @@ export function EditPopover({
               <Label htmlFor="name">Name:</Label>
               <Input
                 id="name"
-                value={nameState}
+                defaultValue={nameState}
                 onChange={(e) => setNameState(e.currentTarget.value)}
                 className="col-span-2 h-8"
               />
@@ -114,7 +114,7 @@ export function EditPopover({
               <Input
                 id="price"
                 type="number"
-                value={priceState}
+                defaultValue={priceState}
                 onChange={(e) => setPriceState(Number(e.currentTarget.value))}
                 className="col-span-2 h-8"
               />
@@ -178,7 +178,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
     goal: goalState,
     type,
     hasDeadline,
-    timeInMonths: Math.ceil(yearsOfSaving * 12),
+    timeInMonths: yearsOfSaving * 12,
   };
 
   return (
@@ -215,7 +215,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
                 <Label htmlFor="name">Name:</Label>
                 <Input
                   id="name"
-                  value={name}
+                  defaultValue={name}
                   onChange={(e) => setName(e.currentTarget.value)}
                   className="col-span-2 h-8"
                 />
@@ -360,7 +360,7 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
                 <Label htmlFor="name">Name:</Label>
                 <Input
                   id="name"
-                  value={name}
+                  defaultValue={name}
                   onChange={(e) => setName(e.currentTarget.value)}
                   className="col-span-2 h-8"
                 />
