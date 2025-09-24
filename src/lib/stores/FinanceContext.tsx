@@ -391,7 +391,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const updatedExpenses = [...expenses];
     updatedExpenses[index] = updatedExpense;
 
-    await updateDoc(financeRef, { incomes: updatedExpenses });
+    await updateDoc(financeRef, { expenses: updatedExpenses });
 
     setFinanceState((prev) =>
       prev ? { ...prev, expenses: updatedExpenses } : prev
