@@ -41,19 +41,13 @@ function DashboardContent() {
               <SummaryCard />
               <TotalSavingsGoal />
             </header>
-            <section
-              className="grid grid-cols-2 grid-rows-2 gap-5 max-w-3/4 w-full "
-              style={{
-                gridTemplateRows: "minmax(300px, 300px) minmax(300px, 300px)",
-              }}
-            >
-              <div className="row-start-1 col-start-1">
+            <section className="flex flex-wrap w-full max-w-3/4 gap-5">
+              <div className="flex flex-col gap-5 flex-1">
                 <MonthlySavingProgress />
-              </div>
-              <div className="row-start-2 col-start-1">
+
                 <IncomeBox />
               </div>
-              <div className="row-start-1 col-start-2 row-span-2">
+              <div className="flex-1">
                 <ExpenseBox />
               </div>
             </section>

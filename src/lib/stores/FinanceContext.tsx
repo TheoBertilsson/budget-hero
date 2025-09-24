@@ -34,9 +34,9 @@ const FinanceContext = createContext<FinanceContextType>({
   addExpense: async () => {},
   addIncome: async () => {},
   addSavings: async () => {},
-  removeExpense: async () => {},
-  removeIncome: async () => {},
-  removeSave: async () => {},
+  removeExpenses: async () => {},
+  removeIncomes: async () => {},
+  removeSaves: async () => {},
   updateExpenses: async () => {},
   updateIncomes: async () => {},
   updateSaves: async () => {},
@@ -188,7 +188,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const removeIncome = async (index: number) => {
+  const removeIncomes = async (indices: number[]) => {
     const user = getCurrentUser();
     const financeRef = doc(
       db,
@@ -198,7 +198,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       `${year}-${month}`
     );
 
-    const updatedIncomes = incomes.filter((_, i) => i !== index);
+    const updatedIncomes = incomes.filter((_, i) => !indices.includes(i));
 
     await updateDoc(financeRef, { incomes: updatedIncomes });
 
@@ -207,7 +207,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const removeSave = async (index: number) => {
+  const removeSaves = async (indices: number[]) => {
     const user = getCurrentUser();
     const financeRef = doc(
       db,
@@ -217,47 +217,58 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       `${year}-${month}`
     );
 
-    const save = savings[index];
+    const updatedSaves = savings.filter((_, i) => !indices.includes(i));
+    const removedSaves = indices.map((i) => savings[i]);
 
-    const goal = goals.find((goal) => goal.id === save.goalId);
-    if (!goal) throw new Error("No goal found");
-    const monthlyGoal = goal.monthly[year][month];
+    const savesByGoal = removedSaves.reduce<
+      Record<string, typeof removedSaves>
+    >((acc, save) => {
+      acc[save.goalId] = acc[save.goalId] || [];
+      acc[save.goalId].push(save);
+      return acc;
+    }, {});
 
-    if (!monthlyGoal) throw new Error("Monthly goal not found");
-    const totalMonthlyPaid = monthlyGoal.paid - save.price;
-    const totalPaid = goal.total - save.price;
+    Object.entries(savesByGoal).forEach(([goalId, saves]) => {
+      const goal = goals.find((g) => g.id === goalId);
+      if (!goal) throw new Error("No goal found");
 
-    const updatedGoal: SavingGoalType = {
-      ...goal,
-      total: totalPaid,
-      monthly: {
-        ...goal.monthly,
-        [year]: {
-          ...goal.monthly?.[year],
-          [month]: {
-            ...monthlyGoal,
-            paid: totalMonthlyPaid,
+      const monthlyGoal = goal.monthly[year][month];
+      if (!monthlyGoal) throw new Error("Monthly goal not found");
+
+      const removedTotal = saves.reduce((sum, s) => sum + s.price, 0);
+
+      const updatedGoal: SavingGoalType = {
+        ...goal,
+        total: goal.total - removedTotal,
+        monthly: {
+          ...goal.monthly,
+          [year]: {
+            ...goal.monthly[year],
+            [month]: {
+              ...monthlyGoal,
+              paid: monthlyGoal.paid - removedTotal,
+            },
           },
         },
-      },
-    };
-    const updatedSaves = savings.filter((_, i) => i !== index);
+      };
+
+      updateGoal(
+        updatedGoal,
+        updatedGoal.id,
+        !updatedGoal.hasDeadline
+          ? updatedGoal.monthly[year][month].goal
+          : undefined
+      );
+    });
 
     await updateDoc(financeRef, { savings: updatedSaves });
 
-    updateGoal(
-      updatedGoal,
-      updatedGoal.id,
-      !updatedGoal.hasDeadline
-        ? updatedGoal.monthly[year][month].goal
-        : undefined
-    );
     setFinanceState((prev) =>
       prev ? { ...prev, savings: updatedSaves } : prev
     );
   };
 
-  const removeExpense = async (index: number) => {
+  const removeExpenses = async (indices: number[]) => {
     const user = getCurrentUser();
 
     if (!user) throw new Error("No user signed in");
@@ -270,7 +281,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       `${year}-${month}`
     );
 
-    const updatedExpenses = expenses.filter((_, i) => i !== index);
+    const updatedExpenses = expenses.filter((_, i) => !indices.includes(i));
 
     await updateDoc(financeRef, { expenses: updatedExpenses });
 
@@ -413,9 +424,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         addExpense,
         addIncome,
         addSavings,
-        removeExpense,
-        removeIncome,
-        removeSave,
+        removeExpenses,
+        removeIncomes,
+        removeSaves,
         updateExpenses,
         updateIncomes,
         updateSaves,

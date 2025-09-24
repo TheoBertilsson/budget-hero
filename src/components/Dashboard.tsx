@@ -10,6 +10,9 @@ import { capitalize } from "@/lib/utils";
 import { ScrollArea } from "./ui/scroll-area";
 import { EditGoals, EditMainGoal, EditPopover } from "./EditPopover";
 import { AddExpenseDrawer, AddIncomeDrawer, AddSavingDrawer } from "./Drawers";
+import { useState } from "react";
+import { Checkbox } from "./ui/checkbox";
+import { TrashIcon } from "lucide-react";
 
 export function SummaryCard() {
   const { incomeTotal, expenseTotal, savingsTotal } = useFinance();
@@ -186,7 +189,9 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
 }
 
 export function ExpenseBox() {
-  const { expenses } = useFinance();
+  const { expenses, removeExpenses } = useFinance();
+  const [showSelect, setShowSelect] = useState(false);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
   return (
     <Card className="flex flex-col h-full justify-between items-center">
@@ -205,13 +210,31 @@ export function ExpenseBox() {
                   </p>
                   <div className="flex gap-1 items-center w-full justify-end">
                     <p>{expense.price.toLocaleString()}</p>
-                    <EditPopover
-                      type="expense"
-                      price={expense.price}
-                      name={expense.name}
-                      category={expense.category}
-                      index={i}
-                    />
+                    {showSelect ? (
+                      <Checkbox
+                        className="size-4"
+                        checked={selectedIndices.includes(i)}
+                        onCheckedChange={(checked) => {
+                          const isChecked = checked === true;
+                          setSelectedIndices((prev) => {
+                            if (isChecked) {
+                              if (prev.includes(i)) return prev;
+                              return [...prev, i];
+                            } else {
+                              return prev.filter((idx) => idx !== i);
+                            }
+                          });
+                        }}
+                      />
+                    ) : (
+                      <EditPopover
+                        type="expense"
+                        price={expense.price}
+                        name={expense.name}
+                        category={expense.category}
+                        index={i}
+                      />
+                    )}
                   </div>
                 </div>
               );
@@ -226,15 +249,40 @@ export function ExpenseBox() {
           </CardContent>
         </>
       )}
-      <CardFooter className="flex justify-end w-full items-end ">
-        <AddExpenseDrawer />
+      <CardFooter className="flex justify-between w-full items-end ">
+        <Button
+          variant={"ghost"}
+          onClick={() => {
+            setShowSelect(!showSelect);
+            setSelectedIndices([]);
+          }}
+        >
+          {showSelect ? "Cancel" : "Select"}
+        </Button>
+        {showSelect ? (
+          <Button
+            variant="destructive"
+            className="bg-red-600 size-8"
+            onClick={() => {
+              setShowSelect(false);
+              removeExpenses(selectedIndices);
+              setSelectedIndices([]);
+            }}
+          >
+            <TrashIcon />
+          </Button>
+        ) : (
+          <AddExpenseDrawer />
+        )}
       </CardFooter>
     </Card>
   );
 }
 
 export function IncomeBox() {
-  const { incomes } = useFinance();
+  const { incomes, removeIncomes } = useFinance();
+  const [showSelect, setShowSelect] = useState(false);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
   return (
     <>
@@ -251,12 +299,30 @@ export function IncomeBox() {
                     <p>{capitalize(income.name)}</p>
                     <div className="flex gap-1 items-center">
                       <p>{income.price.toLocaleString()}</p>
-                      <EditPopover
-                        type="income"
-                        price={income.price}
-                        name={income.name}
-                        index={i}
-                      />
+                      {showSelect ? (
+                        <Checkbox
+                          className="size-4"
+                          checked={selectedIndices.includes(i)}
+                          onCheckedChange={(checked) => {
+                            const isChecked = checked === true;
+                            setSelectedIndices((prev) => {
+                              if (isChecked) {
+                                if (prev.includes(i)) return prev;
+                                return [...prev, i];
+                              } else {
+                                return prev.filter((idx) => idx !== i);
+                              }
+                            });
+                          }}
+                        />
+                      ) : (
+                        <EditPopover
+                          type="income"
+                          price={income.price}
+                          name={income.name}
+                          index={i}
+                        />
+                      )}
                     </div>
                   </div>
                 );
@@ -271,8 +337,31 @@ export function IncomeBox() {
             </CardContent>
           </>
         )}
-        <CardFooter className="flex justify-end w-full items-end ">
-          <AddIncomeDrawer />
+        <CardFooter className="flex justify-between w-full items-end ">
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              setShowSelect(!showSelect);
+              setSelectedIndices([]);
+            }}
+          >
+            {showSelect ? "Cancel" : "Select"}
+          </Button>
+          {showSelect ? (
+            <Button
+              variant="destructive"
+              className="bg-red-600 size-8"
+              onClick={() => {
+                setShowSelect(false);
+                removeIncomes(selectedIndices);
+                setSelectedIndices([]);
+              }}
+            >
+              <TrashIcon />
+            </Button>
+          ) : (
+            <AddIncomeDrawer />
+          )}
         </CardFooter>
       </Card>
     </>
@@ -280,7 +369,9 @@ export function IncomeBox() {
 }
 
 export function SavingsBox() {
-  const { savings } = useFinance();
+  const { savings, removeSaves } = useFinance();
+  const [showSelect, setShowSelect] = useState(false);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
   return (
     <>
@@ -297,13 +388,31 @@ export function SavingsBox() {
                     <p>{capitalize(save.goal)}</p>
                     <div className="flex gap-1 items-center">
                       <p>{save.price.toLocaleString()}</p>
-                      <EditPopover
-                        type="save"
-                        price={save.price}
-                        name={save.goal}
-                        index={i}
-                        goalId={save.goalId}
-                      />
+                      {showSelect ? (
+                        <Checkbox
+                          className="size-4"
+                          checked={selectedIndices.includes(i)}
+                          onCheckedChange={(checked) => {
+                            const isChecked = checked === true;
+                            setSelectedIndices((prev) => {
+                              if (isChecked) {
+                                if (prev.includes(i)) return prev;
+                                return [...prev, i];
+                              } else {
+                                return prev.filter((idx) => idx !== i);
+                              }
+                            });
+                          }}
+                        />
+                      ) : (
+                        <EditPopover
+                          type="save"
+                          price={save.price}
+                          name={save.goal}
+                          index={i}
+                          goalId={save.goalId}
+                        />
+                      )}
                     </div>
                   </div>
                 );
@@ -317,8 +426,31 @@ export function SavingsBox() {
             </CardContent>
           </>
         )}
-        <CardFooter className="flex justify-end w-full items-end ">
-          <AddSavingDrawer />
+        <CardFooter className="flex justify-between w-full items-end ">
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              setShowSelect(!showSelect);
+              setSelectedIndices([]);
+            }}
+          >
+            {showSelect ? "Cancel" : "Select"}
+          </Button>
+          {showSelect ? (
+            <Button
+              variant="destructive"
+              className="bg-red-600 size-8"
+              onClick={() => {
+                setShowSelect(false);
+                removeSaves(selectedIndices);
+                setSelectedIndices([]);
+              }}
+            >
+              <TrashIcon />
+            </Button>
+          ) : (
+            <AddSavingDrawer />
+          )}
         </CardFooter>
       </Card>
     </>

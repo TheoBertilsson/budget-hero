@@ -36,9 +36,9 @@ export function EditPopover({
   goalId,
 }: EditPopoverType) {
   const {
-    removeExpense,
-    removeSave,
-    removeIncome,
+    removeExpenses,
+    removeSaves,
+    removeIncomes,
     updateExpenses,
     updateIncomes,
     updateSaves,
@@ -56,9 +56,9 @@ export function EditPopover({
   }, [category, name, price]);
 
   const removeItem = () => {
-    if (type === "expense") removeExpense(index);
-    else if (type === "save") removeSave(index);
-    else if (type === "income") removeIncome(index);
+    if (type === "expense") removeExpenses([index]);
+    else if (type === "save") removeSaves([index]);
+    else if (type === "income") removeIncomes([index]);
     setOpen(false);
   };
 
