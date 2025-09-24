@@ -199,11 +199,11 @@ export function ExpenseBox() {
                   className="gap-1 text-sm font-semibold flex justify-between border-b pb-1"
                   key={i}
                 >
-                  <p>{capitalize(expense.name)}</p>
-                  <p className="text-primary/60">
+                  <p className="w-full">{capitalize(expense.name)}</p>
+                  <p className="text-primary/60 w-full text-center">
                     {capitalize(expense.category)}
                   </p>
-                  <div className="flex gap-1 items-center">
+                  <div className="flex gap-1 items-center w-full justify-end">
                     <p>{expense.price.toLocaleString()}</p>
                     <EditPopover
                       type="expense"
