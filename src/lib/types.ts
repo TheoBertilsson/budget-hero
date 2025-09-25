@@ -37,9 +37,9 @@ export type FinanceContextType = {
   savingsTotal: number;
   loading: boolean;
   setFinance: (data: MonthlyFinance) => Promise<void>;
-  addExpense: (expense: Expense) => Promise<void>;
-  addIncome: (income: Income) => Promise<void>;
-  addSavings: (year: string, month: string, savings: Save) => Promise<void>;
+  addExpense: (expense: Expense, year: string, month: string) => Promise<void>;
+  addIncome: (income: Income, year: string, month: string) => Promise<void>;
+  addSavings: (savings: Save, year: string, month: string) => Promise<void>;
   removeExpenses: (indices: number[]) => Promise<void>;
   removeIncomes: (indices: number[]) => Promise<void>;
   removeSaves: (indices: number[]) => Promise<void>;

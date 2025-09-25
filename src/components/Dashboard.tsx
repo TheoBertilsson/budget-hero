@@ -6,13 +6,16 @@ import { ChartRadialStacked } from "./ui/radialProgress";
 import { useDate } from "@/lib/stores/DateContext";
 import ConfettiExplosion from "react-confetti-explosion";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
-import { capitalize } from "@/lib/utils";
+import { capitalize, getCurrentUser } from "@/lib/utils";
 import { ScrollArea } from "./ui/scroll-area";
 import { EditGoals, EditMainGoal, EditPopover } from "./EditPopover";
 import { AddExpenseDrawer, AddIncomeDrawer, AddSavingDrawer } from "./Drawers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Checkbox } from "./ui/checkbox";
-import { TrashIcon } from "lucide-react";
+import { PlusIcon, TrashIcon } from "lucide-react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { MonthlyFinance } from "@/lib/types";
 
 export function SummaryCard() {
   const { incomeTotal, expenseTotal, savingsTotal } = useFinance();
@@ -138,7 +141,7 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
 
   return (
     <>
-      <Card className="flex flex-col h-fit justify-between items-center">
+      <Card className="flex flex-col h-fit justify-between items-center w-full flex-1">
         {subGoals.length ? (
           <ScrollArea className="max-h-52 w-full">
             <CardContent className="flex flex-col py-2 gap-4 max-h-52 w-full">
@@ -185,6 +188,156 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
         </CardFooter>
       </Card>
     </>
+  );
+}
+
+export function PreviousMonthBox() {
+  const user = getCurrentUser();
+  const { year, month } = useDate();
+  const { addExpense, addIncome, addSavings } = useFinance();
+  const { addPayment } = useSavingsGoal();
+  const [previousMonthFinance, setPreviousMonthFinance] =
+    useState<MonthlyFinance | null>(null);
+  const previousMonth =
+    Number(month) === 1
+      ? "12"
+      : (Number(month) - 1).toString().padStart(2, "0");
+  const targetYear =
+    previousMonth === "12" ? (Number(year) - 1).toString() : year;
+
+  useEffect(() => {
+    const fetchFinance = async () => {
+      const previousFinanceRef = doc(
+        db,
+        "users",
+        user.uid,
+        "finance",
+        `${targetYear}-${previousMonth}`
+      );
+      const snap = await getDoc(previousFinanceRef);
+
+      if (snap.exists()) {
+        setPreviousMonthFinance(snap.data() as MonthlyFinance);
+      } else {
+        setPreviousMonthFinance(null);
+      }
+    };
+    fetchFinance();
+  }, [year, month]);
+
+  return (
+    <Card className="flex flex-col w-full max-h-[31rem] flex-1">
+      <ScrollArea className="max-h-[28rem] w-full rounded-lg">
+        {previousMonthFinance ? (
+          <CardContent className="flex flex-col py-2 gap-4  overflow-auto w-full">
+            {previousMonthFinance?.incomes?.length > 0 && (
+              <div className="border-b pb-4 flex flex-col gap-2">
+                <h3 className="font-bold">Incomes</h3>
+                <div className="flex flex-col gap-3 bg-primary/10 p-3 rounded-lg">
+                  {previousMonthFinance.incomes.map((income, i) => {
+                    return (
+                      <div
+                        className="gap-1 text-sm font-semibold flex justify-between items-center"
+                        key={i}
+                      >
+                        <p className="w-full">{capitalize(income.name)}</p>
+                        <div className="flex gap-2 items-center w-full justify-end">
+                          <p>{income.price.toLocaleString()}</p>
+                          <Button
+                            variant={"secondary"}
+                            className="size-6 bg-white"
+                            onClick={() => {
+                              addIncome(income, year, month);
+                            }}
+                          >
+                            <PlusIcon />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {previousMonthFinance?.expenses?.length > 0 && (
+              <div className="border-b pb-4 flex flex-col gap-2">
+                <h3 className="font-bold">Expenses</h3>
+                <div className="flex flex-col gap-3 bg-primary/10 p-3 rounded-lg">
+                  {previousMonthFinance.expenses.map((expense, i) => {
+                    return (
+                      <div
+                        className="gap-4 text-sm font-semibold flex justify-between items-center"
+                        key={i}
+                      >
+                        <p className="w-full">{capitalize(expense.name)}</p>
+                        <p className="text-primary/60 w-full text-center">
+                          {capitalize(expense.category)}
+                        </p>
+                        <div className="flex gap-4 items-center w-full justify-end">
+                          <p>{expense.price.toLocaleString()}</p>
+                          <Button
+                            variant={"secondary"}
+                            className="size-6 bg-white"
+                            onClick={() => {
+                              addExpense(expense, year, month);
+                            }}
+                          >
+                            <PlusIcon />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {previousMonthFinance?.savings?.length > 0 && (
+              <div className="pb-4 flex flex-col gap-2">
+                <h3 className="font-bold">Savings</h3>
+                <div className="flex flex-col gap-3 bg-primary/10 p-3 rounded-lg">
+                  {previousMonthFinance.savings.length > 0 &&
+                    previousMonthFinance.savings.map((save, i) => {
+                      return (
+                        <div
+                          className="gap-2 text-sm font-semibold flex justify-between items-center"
+                          key={i}
+                        >
+                          <p className="w-full">{capitalize(save.goal)}</p>
+                          <div className="flex gap-1 items-center w-full justify-end">
+                            <p>{save.price.toLocaleString()}</p>
+                            <Button
+                              variant={"secondary"}
+                              className="size-6 bg-white"
+                              onClick={() => {
+                                addSavings(save, year, month);
+                                addPayment(
+                                  save.goalId,
+                                  year,
+                                  month,
+                                  save.price
+                                );
+                              }}
+                            >
+                              <PlusIcon />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        ) : (
+          <>
+            <div></div>
+            <CardContent className="flex justify-center items-center text-primary/60">
+              <p>No previous month</p>
+            </CardContent>
+          </>
+        )}
+      </ScrollArea>
+    </Card>
   );
 }
 

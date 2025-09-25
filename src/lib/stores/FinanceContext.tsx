@@ -104,7 +104,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     setFinanceState(data);
   };
 
-  const addExpense = async (expense: Expense) => {
+  const addExpense = async (expense: Expense, year: string, month: string) => {
     const user = getCurrentUser();
 
     if (!user) throw new Error("No user signed in");
@@ -137,7 +137,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const addIncome = async (income: Income) => {
+  const addIncome = async (income: Income, year: string, month: string) => {
     const user = getCurrentUser();
     const financeRef = doc(
       db,
@@ -162,7 +162,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           }
     );
   };
-  const addSavings = async (year: string, month: string, saving: Save) => {
+  const addSavings = async (saving: Save, year: string, month: string) => {
     const user = getCurrentUser();
     const financeRef = doc(
       db,

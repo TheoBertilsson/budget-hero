@@ -5,6 +5,7 @@ import {
   ExpenseBox,
   IncomeBox,
   MonthlySavingProgress,
+  PreviousMonthBox,
   SubGoals,
   SummaryCard,
   TotalSavingsGoal,
@@ -52,10 +53,9 @@ function DashboardContent() {
               </div>
             </section>
 
-            <section className="grid grid-cols-2 gap-5 max-w-3/4 w-full">
-              <div className="row-start-1 col-span-2">
-                <SubGoals setShow={setShowSetupNewGoal} />
-              </div>
+            <section className="flex flex-wrap gap-5 max-w-3/4 w-full">
+              <PreviousMonthBox />
+              <SubGoals setShow={setShowSetupNewGoal} />
             </section>
           </main>
         </>

@@ -21,6 +21,7 @@ import { toast } from "sonner";
 
 export function AddExpenseDrawer() {
   const { addExpense, incomeTotal, expenseTotal, savingsTotal } = useFinance();
+  const { year, month } = useDate();
   const [price, setPrice] = useState(0);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
@@ -43,7 +44,7 @@ export function AddExpenseDrawer() {
       return;
     }
 
-    await addExpense({ name, price, category });
+    await addExpense({ name, price, category }, year, month);
 
     setLoading(false);
 
@@ -167,6 +168,7 @@ export function AddExpenseDrawer() {
 
 export function AddIncomeDrawer() {
   const { addIncome } = useFinance();
+  const { year, month } = useDate();
   const [price, setPrice] = useState(0);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -180,7 +182,7 @@ export function AddIncomeDrawer() {
 
     setLoading(true);
 
-    await addIncome({ name, price });
+    await addIncome({ name, price }, year, month);
 
     setLoading(false);
 
@@ -287,11 +289,15 @@ export function AddSavingDrawer() {
     }
     setLoading(true);
 
-    await addSavings(year, month, {
-      goal: goal.label,
-      price,
-      goalId: goal.value,
-    });
+    await addSavings(
+      {
+        goal: goal.label,
+        price,
+        goalId: goal.value,
+      },
+      year,
+      month
+    );
     await addPayment(goal?.value, year, month, price);
     setLoading(false);
 
