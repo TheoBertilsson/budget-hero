@@ -226,7 +226,7 @@ export function PreviousMonthBox() {
   }, [year, month]);
 
   return (
-    <Card className="flex flex-col w-full max-h-[31rem] flex-1">
+    <Card className="flex flex-col w-full items-center justify-center max-h-[31rem] flex-1">
       <ScrollArea className="max-h-[28rem] w-full rounded-lg">
         {previousMonthFinance ? (
           <CardContent className="flex flex-col py-2 gap-4  overflow-auto w-full">
