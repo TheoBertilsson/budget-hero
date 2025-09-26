@@ -45,7 +45,10 @@ export default function LoginPage() {
     }
   };
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-[url(../static/budgetHero.png)] bg-cover bg-foreground">
+    <div
+      className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center h-[100dvh]
+     bg-[url(../static/budgetHero.png)] bg-cover bg-primary "
+    >
       <main className="flex flex-col gap-[32px] row-start-2 items-center w-full">
         <Card className="w-full max-w-sm">
           <CardHeader>
