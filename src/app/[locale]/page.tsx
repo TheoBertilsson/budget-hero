@@ -101,7 +101,7 @@ export default function LoginPage() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? t("auth:pleaseWait") : t("auth:signup")}
+              {loading ? t("auth:pleaseWait") : t("auth:login")}
             </Button>
             <Button variant="outline" className="w-full">
               {t("auth:signinGoogle")}

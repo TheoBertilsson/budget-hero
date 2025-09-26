@@ -286,16 +286,16 @@ export function AddSavingDrawer() {
     },
     {
       threshold: 60,
-      message: t("beMindful"),
+      message: t("beExtraMindful"),
     },
     {
       threshold: 40,
       message: t("stickToBudget"),
     },
-    { threshold: 20, message: t("healthyBudget") },
+    { threshold: 20, message: t("healthyBudgetStableEconomy") },
     {
       threshold: 0,
-      message: t("stableEconomy"),
+      message: t("strongFlexibility"),
     },
   ];
 

@@ -45,7 +45,7 @@ export function MonthlySavingProgress() {
   const { savingsTotal, incomeTotal } = useFinance();
   const savingsPercentage =
     incomeTotal > 0
-      ? Math.ceil(savingsTotal / incomeTotal).toLocaleString()
+      ? Math.ceil((savingsTotal / incomeTotal) * 100).toLocaleString()
       : 0;
 
   const thisMonthSavings = mainGoal?.monthly?.[year]?.[month]?.paid ?? 0;
