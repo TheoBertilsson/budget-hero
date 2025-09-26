@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
-  PopoverAnchor,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
@@ -16,7 +15,6 @@ import { SavingsSlider, SubOrMainGoal } from "./Goals";
 import { Checkbox } from "./ui/checkbox";
 import { useDate } from "@/lib/stores/DateContext";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
-import { ceilToOneDecimal } from "@/lib/utils";
 
 type EditPopoverType = {
   type: "expense" | "save" | "income";
@@ -100,13 +98,17 @@ export function EditPopover({
 
           <div className="grid gap-2">
             <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="name">Name:</Label>
-              <Input
-                id="name"
-                defaultValue={nameState}
-                onChange={(e) => setNameState(e.currentTarget.value)}
-                className="col-span-2 h-8"
-              />
+              {type === "save" || (
+                <>
+                  <Label htmlFor="name">Name:</Label>
+                  <Input
+                    id="name"
+                    defaultValue={nameState}
+                    onChange={(e) => setNameState(e.currentTarget.value)}
+                    className="col-span-2 h-8"
+                  />
+                </>
+              )}
             </div>
 
             <div className="grid grid-cols-3 items-center gap-4">
