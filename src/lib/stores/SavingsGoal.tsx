@@ -14,10 +14,9 @@ import {
   SavingGoalType,
 } from "../types";
 import { useDate } from "./DateContext";
-import { auth, db } from "../firebase";
+import { db } from "../firebase";
 import {
   addDoc,
-  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -30,7 +29,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { ceilToOneDecimal, getCurrentUser } from "../utils";
+import { getCurrentUser } from "../utils";
 
 const SavingContext = createContext<SavingGoalContextType | undefined>(
   undefined

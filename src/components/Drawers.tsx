@@ -18,7 +18,6 @@ import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { CategoryBox, GoalBox } from "./ComboBoxes";
 import { cn, getCurrentUser } from "@/lib/utils";
 import { toast } from "sonner";
-import { Progress } from "./ui/progress";
 
 export function AddExpenseDrawer() {
   const { addExpense, incomeTotal, expenseTotal, savingsTotal } = useFinance();

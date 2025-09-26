@@ -53,7 +53,7 @@ export default function SignupPage() {
         name: username,
         createdAt: serverTimestamp(),
       });
-      useRouter().push("/dashboard");
+      router.push("/dashboard");
     } catch (error) {
       console.error(error);
       setLoading(false);

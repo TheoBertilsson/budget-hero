@@ -27,7 +27,7 @@ export default function LoginPage() {
     return () => unsubscribe();
   }, [router]);
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 

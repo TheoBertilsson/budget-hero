@@ -147,7 +147,7 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
 
   return (
     <>
-      <Card className="flex flex-col h-fit justify-between items-center w-full flex-1">
+      <Card className="flex flex-col h-fit justify-between items-center w-full">
         {subGoals.length ? (
           <ScrollArea className="max-h-52 w-full">
             <CardContent className="flex flex-col py-2 gap-4 max-h-52 w-full">
@@ -198,7 +198,6 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
 }
 
 export function PreviousMonthBox() {
-  const user = getCurrentUser();
   const { year, month } = useDate();
   const { addExpense, addIncome, addSavings } = useFinance();
   const { addPayment } = useSavingsGoal();
@@ -212,6 +211,8 @@ export function PreviousMonthBox() {
     previousMonth === "12" ? (Number(year) - 1).toString() : year;
 
   useEffect(() => {
+    const user = getCurrentUser();
+
     const fetchFinance = async () => {
       const previousFinanceRef = doc(
         db,
@@ -229,13 +230,13 @@ export function PreviousMonthBox() {
       }
     };
     fetchFinance();
-  }, [year, month]);
+  }, [targetYear, previousMonth]);
 
   return (
-    <Card className="flex flex-col w-full items-center justify-center max-h-[31rem] flex-1">
-      <ScrollArea className="h-[28.125rem] w-full rounded-lg">
-        {previousMonthFinance ? (
-          <CardContent className="flex flex-col py-2 gap-4  overflow-auto w-full">
+    <Card className="flex flex-col w-full items-center">
+      {previousMonthFinance ? (
+        <CardContent className="flex flex-col py-2 gap-4 w-full">
+          <ScrollArea className="w-full rounded-lg h-[28.125rem]">
             {previousMonthFinance?.incomes?.length > 0 && (
               <div className="border-b pb-4 flex flex-col gap-2">
                 <h3 className="font-bold">Incomes</h3>
@@ -333,16 +334,15 @@ export function PreviousMonthBox() {
                 </div>
               </div>
             )}
+          </ScrollArea>
+        </CardContent>
+      ) : (
+        <>
+          <CardContent className="flex justify-center items-center text-primary/60 h-full">
+            <p>No previous month</p>
           </CardContent>
-        ) : (
-          <>
-            <div></div>
-            <CardContent className="flex justify-center items-center text-primary/60">
-              <p>No previous month</p>
-            </CardContent>
-          </>
-        )}
-      </ScrollArea>
+        </>
+      )}
     </Card>
   );
 }
@@ -353,7 +353,7 @@ export function ExpenseBox() {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
   return (
-    <Card className="flex flex-col h-full justify-between items-center">
+    <Card className="flex flex-col justify-between items-center h-full">
       {expenses.length > 0 ? (
         <ScrollArea className=" h-[25rem] w-full">
           <CardContent className="flex flex-col py-2 gap-4 overflow-auto w-full">

@@ -13,7 +13,6 @@ import {
   Income,
   Save,
   SavingGoalType,
-  MonthlySavings,
 } from "../types";
 import { auth, db } from "../firebase";
 import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
