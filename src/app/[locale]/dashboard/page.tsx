@@ -1,5 +1,5 @@
 "use client";
-import ProtectedRoute from "../../components/ProtectedRoute";
+import ProtectedRoute from "../../../components/ProtectedRoute";
 import { FinanceProvider } from "@/lib/stores/FinanceContext";
 import {
   ExpenseBox,

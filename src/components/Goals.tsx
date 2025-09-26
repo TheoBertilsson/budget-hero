@@ -16,8 +16,10 @@ import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { RadioGroup } from "radix-ui";
 import { XIcon } from "lucide-react";
 import { ceilToOneDecimal } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export function SetupMainGoalCard() {
+  const { t } = useTranslation();
   const { addSavingsGoal, loading } = useSavingsGoal();
   const [yearsOfSaving, setYearsOfSaving] = useState(3);
   const [goalName, setGoalName] = useState("");
@@ -58,9 +60,9 @@ export function SetupMainGoalCard() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
-            Set up your main saving goal
+            {t("setUpMainGoal")}
           </CardTitle>
-          <CardDescription>Add a goal with or without deadline</CardDescription>
+          <CardDescription>{t("addGoalWithOrWithoutDeadline")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -72,7 +74,7 @@ export function SetupMainGoalCard() {
             }}
           >
             <div className="grid gap-2">
-              <Label htmlFor="savingsGoal">Savings Goal</Label>
+              <Label htmlFor="savingsGoal">{t("savingsGoal")}</Label>
               <Input
                 id="savingsGoal"
                 type="number"
@@ -86,7 +88,7 @@ export function SetupMainGoalCard() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="goalName">Name</Label>
+              <Label htmlFor="goalName">{t("name")}</Label>
               <Input
                 id="goalName"
                 type="text"
@@ -101,7 +103,7 @@ export function SetupMainGoalCard() {
               <div className="flex w-full justify-end items-center gap-2">
                 {" "}
                 <Label htmlFor="noDeadline" className="text-sm">
-                  No deadline
+                  {t("deadline")}
                 </Label>
                 <Checkbox
                   id="noDeadline"
@@ -116,17 +118,16 @@ export function SetupMainGoalCard() {
                     yearsOfSaving={yearsOfSaving}
                   />
                   <p className="">
-                    You need to save:{" "}
-                    <span className="font-bold">
-                      {calculatedMonthlySavingsGoalDisplay}
-                    </span>{" "}
-                    SEK/month
+                    {t("needToSave", {
+                      value: calculatedMonthlySavingsGoalDisplay,
+                      currency: "SEK",
+                    })}
                   </p>
                 </>
               ) : (
                 <>
                   <div className="grid gap-2">
-                    <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+                    <Label htmlFor="monthlyGoal">{t("monthlyGoal")}</Label>
                     <Input
                       id="monthlyGoal"
                       type="number"
@@ -151,7 +152,7 @@ export function SetupMainGoalCard() {
             form="newMainGoalForm"
             disabled={loading}
           >
-            {loading ? "Please wait..." : "Start the planning"}
+            {loading ? t("pleaseWait") : t("startPlanning")}
           </Button>
         </CardFooter>
       </Card>
@@ -164,6 +165,7 @@ export function SetupNewGoal({
 }: {
   setShow: (show: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const { addSavingsGoal, loading } = useSavingsGoal();
   const [yearsOfSaving, setYearsOfSaving] = useState(3);
   const [goalName, setGoalName] = useState("");
@@ -208,7 +210,7 @@ export function SetupNewGoal({
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CardTitle className="text-2xl font-bold flex justify-between items-center">
-              <p>Set up a new saving goal</p>
+              <p>{t("setUpNewGoal")}</p>
               <Button
                 variant={"outline"}
                 className="size-8 p-0"
@@ -217,9 +219,7 @@ export function SetupNewGoal({
                 <XIcon className="size-5" />
               </Button>
             </CardTitle>
-            <CardDescription>
-              Add a sub goal or replace your main goal
-            </CardDescription>
+            <CardDescription>{t("addGoalAgain")} </CardDescription>
           </CardHeader>
           <CardContent>
             <form
@@ -231,7 +231,7 @@ export function SetupNewGoal({
             >
               <SubOrMainGoal setGoalType={setGoalType} />
               <div className="grid gap-2">
-                <Label htmlFor="goalName">Name</Label>
+                <Label htmlFor="goalName">{t("name")}</Label>
                 <Input
                   id="goalName"
                   type="text"
@@ -242,7 +242,7 @@ export function SetupNewGoal({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="savingsGoal">Goal</Label>
+                <Label htmlFor="savingsGoal">{t("goal")}</Label>
                 <Input
                   id="savingsGoal"
                   type="number"
@@ -258,7 +258,7 @@ export function SetupNewGoal({
               <div className="grid gap-2">
                 <div className="flex w-full justify-end items-center gap-2">
                   <Label htmlFor="noDeadline" className="text-sm">
-                    No deadline
+                    {t("deadline")}
                   </Label>
                   <Checkbox
                     id="noDeadline"
@@ -275,17 +275,16 @@ export function SetupNewGoal({
                       yearsOfSaving={yearsOfSaving}
                     />
                     <p className="">
-                      You need to save:{" "}
-                      <span className="font-bold">
-                        {calculatedMonthlySavingsGoalDisplay}
-                      </span>{" "}
-                      SEK/month
+                      {t("needToSave", {
+                        value: calculatedMonthlySavingsGoalDisplay,
+                        currency: "SEK",
+                      })}
                     </p>
                   </>
                 ) : (
                   <>
                     <div className="grid gap-2">
-                      <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+                      <Label htmlFor="monthlyGoal">{t("monthlyGoal")}</Label>
                       <Input
                         id="monthlyGoal"
                         type="number"
@@ -330,11 +329,12 @@ export function SavingsSlider({
   yearsOfSaving,
   setYearsOfSaving,
 }: SavingsSliderProps) {
+  const { t } = useTranslation();
   return (
     <div className="w-full flex flex-col gap-2">
       <Label>
         <span className="font-bold">{ceilToOneDecimal(yearsOfSaving)}</span>{" "}
-        Years of saving
+        {t("yearsOfSaving")}
       </Label>
       <div className="px-4 ">
         <Slider
@@ -354,14 +354,16 @@ export const SubOrMainGoal = ({
 }: {
   setGoalType: (value: "main" | "sub") => void;
 }) => {
+  const { t } = useTranslation();
+
   const goalTypes = [
     {
       value: "sub",
-      label: "Sub Goal",
+      label: t("subGoal"),
     },
     {
       value: "main",
-      label: "Main Goal",
+      label: t("mainGoal"),
     },
   ];
   return (

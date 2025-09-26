@@ -8,6 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useTranslation } from "react-i18next";
 
 export function ChartRadialStacked({
   expenses,
@@ -18,6 +19,7 @@ export function ChartRadialStacked({
   income: number;
   savings: number;
 }) {
+  const { t } = useTranslation();
   const totalLeft = income - expenses - savings;
   const chartData = [{ expenses, income, savings }];
 
