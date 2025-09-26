@@ -41,6 +41,7 @@ export function SummaryCard() {
 export function MonthlySavingProgress() {
   const { mainGoal } = useSavingsGoal();
   const { year, month } = useDate();
+  const { savingsTotal, incomeTotal } = useFinance();
 
   const thisMonthSavings = mainGoal?.monthly?.[year]?.[month]?.paid ?? 0;
 
@@ -49,6 +50,7 @@ export function MonthlySavingProgress() {
   const monthlyProgress = goalThisMonth
     ? Math.round((thisMonthSavings / goalThisMonth) * 100)
     : 0;
+  console.log(savingsTotal);
 
   return (
     <>
@@ -72,14 +74,17 @@ export function MonthlySavingProgress() {
             </div>
 
             <p className="text-sm">
-              This month you have saved{" "}
+              You have saved{" "}
               <span className="font-bold">
-                {thisMonthSavings?.toLocaleString() || 0}
-              </span>{" "}
-              SEK!
+                {savingsTotal.toLocaleString() || 0}
+              </span>
+              {"  "}
+              SEK this month!
               <br /> That is{" "}
-              <span className="font-bold">{monthlyProgress}%</span> of your
-              monthly goal!
+              <span className="font-bold">
+                {Math.ceil(savingsTotal / incomeTotal).toLocaleString()}%
+              </span>{" "}
+              of your income!
             </p>
           </div>
           <SavingsBox />

@@ -18,6 +18,7 @@ import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
 import { CategoryBox, GoalBox } from "./ComboBoxes";
 import { cn, getCurrentUser } from "@/lib/utils";
 import { toast } from "sonner";
+import { Progress } from "./ui/progress";
 
 export function AddExpenseDrawer() {
   const { addExpense, incomeTotal, expenseTotal, savingsTotal } = useFinance();
@@ -274,8 +275,34 @@ export function AddSavingDrawer() {
   const [comboboxError, setComboboxError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const moneyLeft = incomeTotal - expenseTotal - savingsTotal;
+  const moneyLeft = incomeTotal - expenseTotal - savingsTotal - price;
+  const ratio = 1 - Math.max(0, Math.min(1, moneyLeft / incomeTotal));
 
+  const budgetMessages = [
+    {
+      threshold: 80,
+      message: "Every penny counts this month",
+    },
+    {
+      threshold: 60,
+      message: "Be extra mindful of your spending",
+    },
+    {
+      threshold: 40,
+      message: "You need to stick to the budget",
+    },
+    { threshold: 20, message: "Healthy budget, economy is stable" },
+    {
+      threshold: 0,
+      message: "Your budget gives you strong flexibility!",
+    },
+  ];
+
+  function getBudgetMessage(ratio: number) {
+    const percentage = ratio * 100;
+    return budgetMessages.find(({ threshold }) => percentage > threshold)
+      ?.message;
+  }
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -334,23 +361,21 @@ export function AddSavingDrawer() {
       <DrawerContent>
         <div className="mx-auto w-full max-w-sm">
           <DrawerHeader>
-            <DrawerTitle
-              className={cn(moneyLeft - price < 0 && "text-destructive")}
-            >
+            <DrawerTitle className={cn(moneyLeft < 0 && "text-destructive")}>
               {" "}
-              {moneyLeft - price < 0 ? "No money!" : "Add deposit"}
+              {moneyLeft < 0 ? "No money!" : "Add deposit"}
             </DrawerTitle>
             <DrawerDescription
-              className={cn(moneyLeft - price < 0 && "text-destructive")}
+              className={cn(moneyLeft < 0 && "text-destructive")}
             >
-              {moneyLeft - price < 0
+              {moneyLeft < 0
                 ? "Earn an income before depositing!"
                 : "Which goal do you wanna deposit to?"}
             </DrawerDescription>
           </DrawerHeader>
           <form className="p-4" id="expenseForm" onSubmit={handleSubmit}>
-            <div className="flex items-center justify-center space-x-2">
-              <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-center flex-col gap-3 space-x-2">
+              <div className="flex flex-col gap-3">
                 <div className="flex-1 text-center">
                   <p className="text-muted-foreground text-[0.70rem] uppercase">
                     Goals
@@ -380,19 +405,33 @@ export function AddSavingDrawer() {
                     name="savingsPrice"
                   />
                 </div>
-              </div>
+                <div className="h-4 w-full rounded-full bg-gradient-to-r [background-image:linear-gradient(to_right,#22c55e,#eab308,#f97316,#dc2626)] relative">
+                  <div
+                    className="absolute top-1/2 h-4 w-1 bg-white border border-black  -translate-y-1/2"
+                    style={{
+                      left: `calc(${ratio * 100}% - ${ratio * 20}px + 10px)`,
+                    }}
+                  ></div>
+                </div>
+              </div>{" "}
+              <p className="text-sm">
+                {getBudgetMessage(ratio) ||
+                  "Well ahead! Your budget gives you strong flexibility!"}
+              </p>
             </div>
           </form>
           <DrawerFooter>
             <Button
               type="submit"
               form="expenseForm"
-              disabled={loading || moneyLeft - price < 0}
+              disabled={loading || moneyLeft < 0}
             >
               {loading ? "Please wait..." : "Deposit"}
             </Button>
             <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" onClick={() => setPrice(0)}>
+                Cancel
+              </Button>
             </DrawerClose>
           </DrawerFooter>
         </div>
