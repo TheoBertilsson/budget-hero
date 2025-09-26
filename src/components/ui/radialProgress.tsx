@@ -25,15 +25,15 @@ export function ChartRadialStacked({
 
   const chartConfig = {
     expenses: {
-      label: "Expenses",
+      label: t("expense"),
       color: "var(--chart-1)",
     },
     savings: {
-      label: "Savings",
+      label: t("savings"),
       color: "var(--chart-2)",
     },
     income: {
-      label: "Income",
+      label: t("income"),
       color: "var(--chart-3)",
     },
   } satisfies ChartConfig;
@@ -75,7 +75,7 @@ export function ChartRadialStacked({
                       y={(viewBox.cy || 0) - 4}
                       className="fill-muted-foreground text-sm"
                     >
-                      Left
+                      {t("left")}
                     </tspan>
                   </text>
                 );

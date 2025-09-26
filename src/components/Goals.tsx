@@ -95,7 +95,7 @@ export function SetupMainGoalCard() {
                 onChange={(value) => setGoalName(value.currentTarget.value)}
                 min={0}
                 name="goalName"
-                placeholder="New House"
+                placeholder={t("newHouse")}
                 required
               />
             </div>
@@ -237,7 +237,7 @@ export function SetupNewGoal({
                   type="text"
                   onChange={(value) => setGoalName(value.currentTarget.value)}
                   name="goalName"
-                  placeholder="New House"
+                  placeholder={t("newHouse")}
                   required
                 />
               </div>

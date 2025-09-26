@@ -11,35 +11,8 @@ import {
   CommandList,
 } from "./ui/command";
 import { cn } from "@/lib/utils";
-
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
-
-const categories = [
-  {
-    value: "housing",
-    label: "Housing",
-  },
-  {
-    value: "transport",
-    label: "Transport",
-  },
-  {
-    value: "food",
-    label: "Food",
-  },
-  {
-    value: "entertainment",
-    label: "Entertainment",
-  },
-  {
-    value: "health",
-    label: "Health",
-  },
-  {
-    value: "miscellaneous",
-    label: "Miscellaneous",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 export function CategoryBox({
   value,
@@ -53,7 +26,33 @@ export function CategoryBox({
   setError?: (error: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
-
+  const { t } = useTranslation();
+  const categories = [
+    {
+      value: "housing",
+      label: t("housing"),
+    },
+    {
+      value: "transport",
+      label: t("transport"),
+    },
+    {
+      value: "food",
+      label: t("food"),
+    },
+    {
+      value: "entertainment",
+      label: t("entertainment"),
+    },
+    {
+      value: "health",
+      label: t("health"),
+    },
+    {
+      value: "miscellaneous",
+      label: t("miscellaneous"),
+    },
+  ];
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -68,15 +67,15 @@ export function CategoryBox({
         >
           {value
             ? categories.find((category) => category.value === value)?.label
-            : "Select category..."}
+            : t("selectCategory")}
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search category..." />
+          <CommandInput placeholder={t("searchCategory")} />
           <CommandList>
-            <CommandEmpty>No categories found.</CommandEmpty>
+            <CommandEmpty>{t("noCategoryFound")}</CommandEmpty>
             <CommandGroup>
               {categories.map((category) => (
                 <CommandItem
@@ -132,6 +131,7 @@ export function GoalBox({
 }) {
   const [open, setOpen] = useState(false);
   const { goals } = useSavingsGoal();
+  const { t } = useTranslation();
 
   const goalsMap = goals.map((goal) => {
     return { value: goal.id, label: goal.name, id: goal.id };
@@ -152,15 +152,15 @@ export function GoalBox({
           {selectedOption?.label
             ? goalsMap.find((goal) => goal.value === selectedOption.value)
                 ?.label
-            : "Select goal..."}
+            : t("selectGoal")}
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search goals..." />
+          <CommandInput placeholder={t("searchGoal")} />
           <CommandList>
-            <CommandEmpty>No goals found.</CommandEmpty>
+            <CommandEmpty>{t("noGoalsFound")}</CommandEmpty>
             <CommandGroup>
               {goalsMap.map((goal) => (
                 <CommandItem
