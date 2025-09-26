@@ -15,6 +15,7 @@ import { SavingsSlider, SubOrMainGoal } from "./Goals";
 import { Checkbox } from "./ui/checkbox";
 import { useDate } from "@/lib/stores/DateContext";
 import { useSavingsGoal } from "@/lib/stores/SavingsGoal";
+import { useTranslation } from "react-i18next";
 
 type EditPopoverType = {
   type: "expense" | "save" | "income";
@@ -41,7 +42,7 @@ export function EditPopover({
     updateIncomes,
     updateSaves,
   } = useFinance();
-
+  const { t } = useTranslation();
   const [categoryState, setCategoryState] = useState<string>(category || "");
   const [nameState, setNameState] = useState(name);
   const [priceState, setPriceState] = useState(price);
@@ -93,14 +94,16 @@ export function EditPopover({
       <PopoverContent className="w-80 flex flex-col gap-4 shadow-2xl">
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="leading-none font-medium">Edit {type}</h4>
+            <h4 className="leading-none font-medium">
+              {t("editType", { type: t(type) })}
+            </h4>
           </div>
 
           <div className="grid gap-2">
             <div className="grid grid-cols-3 items-center gap-4">
               {type === "save" || (
                 <>
-                  <Label htmlFor="name">Name:</Label>
+                  <Label htmlFor="name">{t("name")}:</Label>
                   <Input
                     id="name"
                     defaultValue={nameState}
@@ -112,7 +115,7 @@ export function EditPopover({
             </div>
 
             <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="price">Price:</Label>
+              <Label htmlFor="price">{t("price")}:</Label>
               <Input
                 id="price"
                 type="number"
@@ -124,7 +127,7 @@ export function EditPopover({
 
             {category !== undefined && (
               <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="category">Category:</Label>
+                <Label htmlFor="category">{t("category")}:</Label>
                 <CategoryBox
                   value={categoryState}
                   setValue={setCategoryState}
@@ -144,7 +147,7 @@ export function EditPopover({
           </Button>
 
           <Button variant="secondary" onClick={updateItem}>
-            Save
+            {t("save")}
           </Button>
         </div>
       </PopoverContent>
@@ -155,6 +158,7 @@ export function EditPopover({
 export function EditGoals({ goal }: { goal: SavingGoalType }) {
   const { year, month } = useDate();
   const { removeGoal, updateGoal } = useSavingsGoal();
+  const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(goal.name);
@@ -196,7 +200,9 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
       <PopoverContent className="w-80 flex flex-col gap-4 shadow-2xl">
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="leading-none font-medium">Edit goal</h4>
+            <h4 className="leading-none font-medium">
+              {t("editType", { type: t("goal") })}
+            </h4>
           </div>
           <form
             onSubmit={(event) => {
@@ -214,7 +220,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
               <SubOrMainGoal setGoalType={setType} />
 
               <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="name">Name:</Label>
+                <Label htmlFor="name">{t("name")}:</Label>
                 <Input
                   id="name"
                   defaultValue={name}
@@ -224,7 +230,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
               </div>
 
               <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="goal">Goal:</Label>
+                <Label htmlFor="goal">{t("goal")}:</Label>
                 <Input
                   id="goal"
                   defaultValue={goalState}
@@ -238,7 +244,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
             <div className="grid gap-2">
               <div className="flex w-full justify-end items-center gap-2">
                 <Label htmlFor="hasDeadline" className="text-sm">
-                  No deadline
+                  {t("deadline")}
                 </Label>
                 <Checkbox
                   id="hasDeadline"
@@ -254,14 +260,15 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
                     setYearsOfSaving={setYearsOfSaving}
                   />
                   <p>
-                    You need to save:{" "}
-                    <span className="font-bold">{monthlyGoalDisplay}</span>{" "}
-                    SEK/month
+                    {t("needToSave", {
+                      value: monthlyGoalDisplay,
+                      currency: "SEK",
+                    })}
                   </p>
                 </>
               ) : (
                 <div className="grid gap-2">
-                  <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+                  <Label htmlFor="monthlyGoal">{t("monthlyGoal")}</Label>
                   <Input
                     id="monthlyGoal"
                     type="number"
@@ -296,7 +303,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
           </Button>
 
           <Button form="editGoalsForm" variant="secondary" type="submit">
-            Save
+            {t("save")}
           </Button>
         </div>
       </PopoverContent>
@@ -307,6 +314,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
 export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
   const { year, month } = useDate();
   const { removeGoal, updateGoal } = useSavingsGoal();
+  const { t } = useTranslation();
 
   const [hasDeadline, setHasDeadline] = useState(goal.hasDeadline);
   const [name, setName] = useState(goal.name);
@@ -343,7 +351,9 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
       <PopoverContent className="w-80 flex flex-col gap-4 shadow-2xl">
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="leading-none font-medium">Edit goal</h4>
+            <h4 className="leading-none font-medium">
+              {t("editType", { type: t("goal") })}
+            </h4>
           </div>
           <form
             id="editMainGoalForm"
@@ -359,7 +369,7 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
           >
             <div className="grid gap-2">
               <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="name">Name:</Label>
+                <Label htmlFor="name">{t("name")}:</Label>
                 <Input
                   id="name"
                   defaultValue={name}
@@ -369,7 +379,7 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
               </div>
 
               <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="goal">Goal:</Label>
+                <Label htmlFor="goal">{t("goal")}:</Label>
                 <Input
                   id="goal"
                   type="number"
@@ -381,7 +391,7 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
 
               <div className="flex w-full justify-end items-center gap-2">
                 <Label htmlFor="hasDeadline" className="text-sm">
-                  No deadline
+                  {t("deadline")}
                 </Label>
                 <Checkbox
                   id="hasDeadline"
@@ -397,14 +407,15 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
                     yearsOfSaving={yearsOfSaving}
                   />
                   <p>
-                    You need to save:{" "}
-                    <span className="font-bold">{monthlyGoalDisplay}</span>{" "}
-                    SEK/month
+                    {t("needToSave", {
+                      value: monthlyGoalDisplay,
+                      currency: "SEK",
+                    })}
                   </p>
                 </>
               ) : (
                 <div className="grid gap-2">
-                  <Label htmlFor="monthlyGoal">Monthly saving goal</Label>
+                  <Label htmlFor="monthlyGoal">{t("monthlyGoal")}</Label>
                   <Input
                     id="monthlyGoal"
                     type="number"
@@ -439,7 +450,7 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
           </Button>
 
           <Button type="submit" form="editMainGoalForm" variant="secondary">
-            Save
+            {t("save")}
           </Button>
         </div>
       </PopoverContent>

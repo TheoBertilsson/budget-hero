@@ -16,6 +16,7 @@ import { PlusIcon, TrashIcon } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { MonthlyFinance } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 
 export function SummaryCard() {
   const { incomeTotal, expenseTotal, savingsTotal } = useFinance();
@@ -38,9 +39,14 @@ export function SummaryCard() {
 }
 
 export function MonthlySavingProgress() {
+  const { t } = useTranslation();
   const { mainGoal } = useSavingsGoal();
   const { year, month } = useDate();
   const { savingsTotal, incomeTotal } = useFinance();
+  const savingsPercentage =
+    incomeTotal > 0
+      ? Math.ceil((savingsTotal / incomeTotal) * 100).toLocaleString()
+      : 0;
 
   const thisMonthSavings = mainGoal?.monthly?.[year]?.[month]?.paid ?? 0;
 
@@ -72,20 +78,11 @@ export function MonthlySavingProgress() {
             </div>
 
             <p className="text-sm">
-              You have saved{" "}
-              <span className="font-bold">
-                {savingsTotal.toLocaleString() || 0}
-              </span>
-              {"  "}
-              SEK this month!
-              <br /> That is{" "}
-              <span className="font-bold">
-                {incomeTotal > 0
-                  ? Math.ceil(savingsTotal / incomeTotal).toLocaleString()
-                  : 0}
-                %
-              </span>{" "}
-              of your income!
+              {t("totalSaved", { value: savingsTotal, currency: "SEK" })}
+              <br />
+              {t("incomePercentage", {
+                value: savingsPercentage.toLocaleString(),
+              })}
             </p>
           </div>
           <SavingsBox />
@@ -97,6 +94,7 @@ export function MonthlySavingProgress() {
 
 export function TotalSavingsGoal() {
   const { mainGoal } = useSavingsGoal();
+  const { t } = useTranslation();
 
   const totalProgress = mainGoal?.goal
     ? Math.round((mainGoal.total / mainGoal.goal) * 100)
@@ -125,15 +123,13 @@ export function TotalSavingsGoal() {
               )}
             </div>
             <p className="text-sm leading-6">
-              You have saved a total of{" "}
-              <span className="font-bold">
-                {mainGoal?.total?.toLocaleString() || 0}
-              </span>{" "}
-              SEK!
-              <br /> That is <span className="font-bold">
-                {totalProgress}%
-              </span>{" "}
-              of your goal!
+              {t("totalSaved", {
+                value: mainGoal?.total?.toLocaleString() || 0,
+                currency: "SEK",
+              })}
+
+              <br />
+              {t("goalPercentage", { value: totalProgress })}
             </p>
           </CardContent>
         </Card>
@@ -144,6 +140,7 @@ export function TotalSavingsGoal() {
 
 export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
   const { subGoals } = useSavingsGoal();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -183,13 +180,13 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
           <>
             <div></div>
             <CardContent className="flex justify-center items-center text-primary/60">
-              <p>No sub goals set</p>
+              <p>{t("noSubGoals")}</p>
             </CardContent>
           </>
         )}
         <CardFooter className="flex justify-end w-full">
           <Button variant={"outline"} onClick={() => setShow(true)}>
-            New goal
+            {t("newGoal")}
           </Button>
         </CardFooter>
       </Card>
@@ -199,6 +196,7 @@ export function SubGoals({ setShow }: { setShow: (show: boolean) => void }) {
 
 export function PreviousMonthBox() {
   const { year, month } = useDate();
+  const { t } = useTranslation();
   const { addExpense, addIncome, addSavings } = useFinance();
   const { addPayment } = useSavingsGoal();
   const [previousMonthFinance, setPreviousMonthFinance] =
@@ -239,7 +237,7 @@ export function PreviousMonthBox() {
           <ScrollArea className="w-full rounded-lg h-[28.125rem]">
             {previousMonthFinance?.incomes?.length > 0 && (
               <div className="border-b pb-4 flex flex-col gap-2">
-                <h3 className="font-bold">Incomes</h3>
+                <h3 className="font-bold">{t("income")}</h3>
                 <div className="flex flex-col gap-2 sm:gap-3 bg-primary/10 p-3 rounded-lg">
                   {previousMonthFinance.incomes.map((income, i) => {
                     return (
@@ -268,7 +266,7 @@ export function PreviousMonthBox() {
             )}
             {previousMonthFinance?.expenses?.length > 0 && (
               <div className="border-b pb-4 flex flex-col gap-2">
-                <h3 className="font-bold">Expenses</h3>
+                <h3 className="font-bold">{t("expense")}</h3>
                 <div className="flex flex-col gap-3 bg-primary/10 p-3 rounded-lg">
                   {previousMonthFinance.expenses.map((expense, i) => {
                     return (
@@ -300,7 +298,7 @@ export function PreviousMonthBox() {
             )}
             {previousMonthFinance?.savings?.length > 0 && (
               <div className="pb-4 flex flex-col gap-2">
-                <h3 className="font-bold">Savings</h3>
+                <h3 className="font-bold">{t("savings")}</h3>
                 <div className="flex flex-col gap-3 bg-primary/10 p-3 rounded-lg">
                   {previousMonthFinance.savings.length > 0 &&
                     previousMonthFinance.savings.map((save, i) => {
@@ -339,7 +337,7 @@ export function PreviousMonthBox() {
       ) : (
         <>
           <CardContent className="flex justify-center items-center text-primary/60 h-full">
-            <p>No previous month</p>
+            <p>{t("noPreviousMonth")}</p>
           </CardContent>
         </>
       )}
@@ -349,6 +347,7 @@ export function PreviousMonthBox() {
 
 export function ExpenseBox() {
   const { expenses, removeExpenses } = useFinance();
+  const { t } = useTranslation();
   const [showSelect, setShowSelect] = useState(false);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
@@ -404,7 +403,7 @@ export function ExpenseBox() {
         <>
           <div></div>
           <CardContent className="flex justify-center items-center text-primary/60">
-            <p>No expenses yet</p>
+            <p>{t("noExpenses")}</p>
           </CardContent>
         </>
       )}
@@ -416,7 +415,7 @@ export function ExpenseBox() {
             setSelectedIndices([]);
           }}
         >
-          {showSelect ? "Cancel" : "Select"}
+          {showSelect ? t("cancel") : t("select")}
         </Button>
         {showSelect ? (
           <Button
@@ -440,6 +439,7 @@ export function ExpenseBox() {
 
 export function IncomeBox() {
   const { incomes, removeIncomes } = useFinance();
+  const { t } = useTranslation();
   const [showSelect, setShowSelect] = useState(false);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
@@ -492,7 +492,7 @@ export function IncomeBox() {
           <>
             <div></div>
             <CardContent className="flex justify-center items-center text-primary/60">
-              <p>No income yet</p>
+              <p>{t("noIncome")}</p>
             </CardContent>
           </>
         )}
@@ -504,7 +504,7 @@ export function IncomeBox() {
               setSelectedIndices([]);
             }}
           >
-            {showSelect ? "Cancel" : "Select"}
+            {showSelect ? t("cancel") : t("select")}
           </Button>
           {showSelect ? (
             <Button
@@ -529,6 +529,7 @@ export function IncomeBox() {
 
 export function SavingsBox() {
   const { savings, removeSaves } = useFinance();
+  const { t } = useTranslation();
   const [showSelect, setShowSelect] = useState(false);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
@@ -581,7 +582,7 @@ export function SavingsBox() {
         ) : (
           <>
             <CardContent className="flex justify-center items-center text-primary/60">
-              <p>No savings yet</p>
+              <p>{t("noSavings")}</p>
             </CardContent>
           </>
         )}
@@ -593,7 +594,7 @@ export function SavingsBox() {
               setSelectedIndices([]);
             }}
           >
-            {showSelect ? "Cancel" : "Select"}
+            {showSelect ? t("cancel") : t("select")}
           </Button>
           {showSelect ? (
             <Button

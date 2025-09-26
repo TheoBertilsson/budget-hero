@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@radix-ui/react-label";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -46,8 +48,8 @@ export default function LoginPage() {
   };
   return (
     <div
-      className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center h-[100dvh]
-     bg-[url(../static/budgetHero.png)] bg-cover bg-primary "
+      className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center bg-[url(../../static/budgetHero.png)] h-[100dvh]
+     bg-cover bg-primary "
     >
       <main className="flex flex-col gap-[32px] row-start-2 items-center w-full">
         <Card className="w-full max-w-sm">
@@ -55,7 +57,7 @@ export default function LoginPage() {
             <CardTitle className="text-2xl font-bold">Budget Hero</CardTitle>
             <CardAction>
               <Button variant={"link"}>
-                <Link href="/signup"> Sign up</Link>
+                <Link href="/signup">{t("auth:signup")}</Link>
               </Button>
             </CardAction>
           </CardHeader>
@@ -74,12 +76,12 @@ export default function LoginPage() {
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">{t("auth:password")}</Label>
                     <a
                       href="#"
                       className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                     >
-                      Forgot your password?
+                      {t("auth:forgotPassword")}
                     </a>
                   </div>
                   <Input
@@ -99,10 +101,10 @@ export default function LoginPage() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? "Please wait..." : "Login"}
+              {loading ? t("auth:pleaseWait") : t("auth:login")}
             </Button>
             <Button variant="outline" className="w-full">
-              Login with Google
+              {t("auth:signinGoogle")}
             </Button>
           </CardFooter>
         </Card>
@@ -113,7 +115,7 @@ export default function LoginPage() {
           href=""
           target="_blank"
         >
-          by Theo Bertilsson
+          {t("auth:byTheoBertilsson")}
         </a>
       </footer>
     </div>

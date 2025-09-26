@@ -20,8 +20,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "react-i18next";
 
 export default function SignupPage() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -61,15 +63,15 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-[url(../static/budgetHero.png)] bg-cover">
+    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-[url(../../static/budgetHero.png)] bg-cover">
       <main className="flex flex-col gap-[32px] row-start-2 items-center w-full">
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">Budget Hero</CardTitle>
-            <CardDescription>Sign up to start your adventure</CardDescription>
+            <CardDescription>{t("auth:signupAdventure")}</CardDescription>
             <CardAction>
               <Button variant={"link"}>
-                <Link href="/"> Log in</Link>
+                <Link href="/">{t("auth:login")}</Link>
               </Button>
             </CardAction>
           </CardHeader>
@@ -77,7 +79,7 @@ export default function SignupPage() {
             <form onSubmit={handleSignup} id="signupForm">
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="username">{t("auth:username")}</Label>
                   <Input id="username" name="username" type="text" required />
                 </div>
                 <div className="grid gap-2">
@@ -91,7 +93,7 @@ export default function SignupPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("auth:password")}</Label>
 
                   <Input
                     id="password"
@@ -110,10 +112,10 @@ export default function SignupPage() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? "Please wait..." : "Sign up"}
+              {loading ? t("auth:pleaseWait") : t("auth:signup")}
             </Button>
             <Button variant="outline" className="w-full">
-              Sign up with Google
+              {t("auth:signinGoogle")}
             </Button>
           </CardFooter>
         </Card>
@@ -124,7 +126,7 @@ export default function SignupPage() {
           href=""
           target="_blank"
         >
-          by Theo Bertilsson
+          {t("auth:byTheoBertilsson")}
         </a>
       </footer>
     </div>
