@@ -3,7 +3,7 @@
 **Budget Hero** is a gamified personal finance web application designed to help you track expenses, set savings goals, gain insights into your financial habits and also COMPETE WIH YOUR FRIENDS!
 Built with **Next.js** and **Firebase**, it combines clean UI, responsive performance, and modern development practices to deliver a smooth user experience.
 
-<a href="https://www.budget-hero.app"/>
+<a href="https://www.budget-hero.app">www.budget-hero.app</a>
 
 <img width="4286" height="3528" alt="image" src="https://github.com/user-attachments/assets/8726fda2-eea7-478d-82f0-8226c063b295" />
 
