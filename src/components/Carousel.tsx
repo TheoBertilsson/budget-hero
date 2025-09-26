@@ -46,7 +46,7 @@ export default function MonthSlider() {
   }, [api, month]);
 
   return (
-    <div className="mx-auto max-w-md flex justify-center items-center">
+    <div className="mx-auto max-w-md w-full flex justify-center items-center">
       <Carousel
         setApi={setApi}
         className="w-full max-w-md"
@@ -80,7 +80,9 @@ export default function MonthSlider() {
                 )}
               >
                 <CardContent className="flex items-center justify-center">
-                  <span className="text-4xl font-semibold">{name}</span>
+                  <span className="text-3xl md:text-4xl font-semibold">
+                    {name}
+                  </span>
                 </CardContent>
               </Card>
             </CarouselItem>

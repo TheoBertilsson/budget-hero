@@ -32,17 +32,17 @@ function DashboardContent() {
           {showSetupNewGoal && <SetupNewGoal setShow={setShowSetupNewGoal} />}
           <main
             className={cn(
-              " h-full flex flex-col items-center gap-5 min-h-screen  pb-5",
+              " h-full flex flex-col items-center gap-5 min-h-screen p-5",
               showSetupNewGoal ? "max-h-screen overflow-hidden" : ""
             )}
           >
             <SettingsDialog />
-            <header className="w-full max-w-3/4 flex flex-col gap-5">
+            <header className="w-full xl:max-w-3/4 flex flex-col gap-5">
               <MonthSlider />
               <SummaryCard />
               <TotalSavingsGoal />
             </header>
-            <section className="flex flex-wrap w-full max-w-3/4 gap-5">
+            <section className="flex flex-col lg:flex-row w-full xl:max-w-3/4  gap-5">
               <div className="flex flex-col gap-5 flex-1">
                 <MonthlySavingProgress />
 
@@ -52,8 +52,7 @@ function DashboardContent() {
                 <ExpenseBox />
               </div>
             </section>
-
-            <section className="flex flex-wrap gap-5 max-w-3/4 w-full">
+            <section className="flex flex-col lg:flex-row gap-5 xl:max-w-3/4 w-full">
               <PreviousMonthBox />
               <SubGoals setShow={setShowSetupNewGoal} />
             </section>

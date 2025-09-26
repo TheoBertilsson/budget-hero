@@ -43,9 +43,13 @@ export function ChartRadialStacked({
       <RadialBarChart
         data={chartData}
         endAngle={180}
-        innerRadius={160}
-        outerRadius={260}
-        cy={"100%"}
+        cy="100%"
+        innerRadius={
+          window.innerWidth < 400 ? 80 : window.innerWidth < 768 ? 130 : 160
+        }
+        outerRadius={
+          window.innerWidth < 400 ? 130 : window.innerWidth < 768 ? 200 : 260
+        }
       >
         <ChartTooltip
           cursor={false}
@@ -60,7 +64,7 @@ export function ChartRadialStacked({
                     <tspan
                       x={viewBox.cx}
                       y={(viewBox.cy || 0) - 32}
-                      className="fill-foreground text-4xl font-bold"
+                      className="fill-foreground text-xl xs:text-3xl md:text-4xl font-bold"
                     >
                       {totalLeft.toLocaleString()}
                     </tspan>

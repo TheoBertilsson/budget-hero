@@ -32,7 +32,6 @@ export function SummaryCard() {
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between items-center"></CardFooter>
       </Card>
     </>
   );
@@ -50,7 +49,6 @@ export function MonthlySavingProgress() {
   const monthlyProgress = goalThisMonth
     ? Math.round((thisMonthSavings / goalThisMonth) * 100)
     : 0;
-  console.log(savingsTotal);
 
   return (
     <>
@@ -82,7 +80,10 @@ export function MonthlySavingProgress() {
               SEK this month!
               <br /> That is{" "}
               <span className="font-bold">
-                {Math.ceil(savingsTotal / incomeTotal).toLocaleString()}%
+                {incomeTotal > 0
+                  ? Math.ceil(savingsTotal / incomeTotal).toLocaleString()
+                  : 0}
+                %
               </span>{" "}
               of your income!
             </p>
@@ -232,13 +233,13 @@ export function PreviousMonthBox() {
 
   return (
     <Card className="flex flex-col w-full items-center justify-center max-h-[31rem] flex-1">
-      <ScrollArea className="max-h-[28rem] w-full rounded-lg">
+      <ScrollArea className="h-[28.125rem] w-full rounded-lg">
         {previousMonthFinance ? (
           <CardContent className="flex flex-col py-2 gap-4  overflow-auto w-full">
             {previousMonthFinance?.incomes?.length > 0 && (
               <div className="border-b pb-4 flex flex-col gap-2">
                 <h3 className="font-bold">Incomes</h3>
-                <div className="flex flex-col gap-3 bg-primary/10 p-3 rounded-lg">
+                <div className="flex flex-col gap-2 sm:gap-3 bg-primary/10 p-3 rounded-lg">
                   {previousMonthFinance.incomes.map((income, i) => {
                     return (
                       <div
@@ -271,14 +272,14 @@ export function PreviousMonthBox() {
                   {previousMonthFinance.expenses.map((expense, i) => {
                     return (
                       <div
-                        className="gap-4 text-sm font-semibold flex justify-between items-center"
+                        className="gap-2 sm:gap-4 text-sm font-semibold flex justify-between items-center"
                         key={i}
                       >
                         <p className="w-full">{capitalize(expense.name)}</p>
-                        <p className="text-primary/60 w-full text-center">
+                        <p className="text-primary/60 w-full text-center hidden sm:block">
                           {capitalize(expense.category)}
                         </p>
-                        <div className="flex gap-4 items-center w-full justify-end">
+                        <div className="flex gap-2 sm:gap-4 items-center w-full justify-end">
                           <p>{expense.price.toLocaleString()}</p>
                           <Button
                             variant={"secondary"}
@@ -354,8 +355,8 @@ export function ExpenseBox() {
   return (
     <Card className="flex flex-col h-full justify-between items-center">
       {expenses.length > 0 ? (
-        <ScrollArea className=" max-h-[31.25rem] w-full">
-          <CardContent className="flex flex-col py-2 gap-4  overflow-auto w-full">
+        <ScrollArea className=" h-[25rem] w-full">
+          <CardContent className="flex flex-col py-2 gap-4 overflow-auto w-full">
             {expenses.map((expense, i) => {
               return (
                 <div
@@ -363,7 +364,7 @@ export function ExpenseBox() {
                   key={i}
                 >
                   <p className="w-full">{capitalize(expense.name)}</p>
-                  <p className="text-primary/60 w-full text-center">
+                  <p className="text-primary/60 w-full text-center hidden sm:block">
                     {capitalize(expense.category)}
                   </p>
                   <div className="flex gap-1 items-center w-full justify-end">
