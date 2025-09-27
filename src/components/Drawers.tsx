@@ -415,7 +415,7 @@ export function AddSavingDrawer() {
                   ></div>
                 </div>
               </div>{" "}
-              <p className="text-sm">
+              <p className="text-sm w-full text-center">
                 {getBudgetMessage(ratio) || t("strongFlexibility")}
               </p>
             </div>
