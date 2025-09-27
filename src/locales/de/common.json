@@ -75,5 +75,6 @@
   "editAccount": "Bearbeiten Sie Ihr Konto!",
   "salary": "Gehalt",
   "newHouse": "Neues Haus",
-  "electricalBill": "Stromrechnung"
+  "electricalBill": "Stromrechnung",
+  "currencyIcon": "€"
 }

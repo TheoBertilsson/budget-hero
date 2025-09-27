@@ -262,7 +262,7 @@ export function EditGoals({ goal }: { goal: SavingGoalType }) {
                   <p>
                     {t("needToSave", {
                       value: monthlyGoalDisplay,
-                      currency: "SEK",
+                      currency: t("currencyIcon"),
                     })}
                   </p>
                 </>
@@ -409,7 +409,7 @@ export function EditMainGoal({ goal }: { goal: SavingGoalType }) {
                   <p>
                     {t("needToSave", {
                       value: monthlyGoalDisplay,
-                      currency: "SEK",
+                      currency: t("currencyIcon"),
                     })}
                   </p>
                 </>

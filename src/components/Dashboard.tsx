@@ -78,7 +78,10 @@ export function MonthlySavingProgress() {
             </div>
 
             <p className="text-sm">
-              {t("totalSaved", { value: savingsTotal, currency: "SEK" })}
+              {t("totalSaved", {
+                value: savingsTotal,
+                currency: t("currencyIcon"),
+              })}
               <br />
               {t("incomePercentage", {
                 value: savingsPercentage.toLocaleString(),
@@ -125,7 +128,7 @@ export function TotalSavingsGoal() {
             <p className="text-sm leading-6">
               {t("totalSaved", {
                 value: mainGoal?.total?.toLocaleString() || 0,
-                currency: "SEK",
+                currency: t("currencyIcon"),
               })}
 
               <br />

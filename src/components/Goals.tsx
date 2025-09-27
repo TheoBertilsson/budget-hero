@@ -120,7 +120,7 @@ export function SetupMainGoalCard() {
                   <p className="">
                     {t("needToSave", {
                       value: calculatedMonthlySavingsGoalDisplay,
-                      currency: "SEK",
+                      currency: t("currencyIcon"),
                     })}
                   </p>
                 </>
@@ -277,7 +277,7 @@ export function SetupNewGoal({
                     <p className="">
                       {t("needToSave", {
                         value: calculatedMonthlySavingsGoalDisplay,
-                        currency: "SEK",
+                        currency: t("currencyIcon"),
                       })}
                     </p>
                   </>
