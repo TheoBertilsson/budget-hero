@@ -48,8 +48,8 @@ export default function LoginPage() {
   };
   return (
     <div
-      className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center bg-[url(../../static/budgetHero.png)] h-[100dvh]
-     bg-cover bg-primary "
+      className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center h-[100dvh]
+      "
     >
       <main className="flex flex-col gap-[32px] row-start-2 items-center w-full">
         <Card className="w-full max-w-sm">

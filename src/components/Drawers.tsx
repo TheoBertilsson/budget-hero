@@ -109,7 +109,7 @@ export function AddExpenseDrawer() {
                     {t("name")}
                   </Label>
                   <Input
-                    className="text-7xl font-bold tracking-tighter"
+                    className=" font-bold tracking-tighter"
                     type="text"
                     required
                     value={name || ""}
@@ -126,7 +126,7 @@ export function AddExpenseDrawer() {
                     {t("price")}
                   </Label>
                   <Input
-                    className="text-7xl font-bold tracking-tighter"
+                    className=" font-bold tracking-tighter"
                     placeholder="0"
                     type="number"
                     min={0}
@@ -218,7 +218,7 @@ export function AddIncomeDrawer() {
                     {t("name")}
                   </Label>
                   <Input
-                    className="text-7xl font-bold tracking-tighter"
+                    className=" font-bold tracking-tighter"
                     type="text"
                     required
                     value={name || ""}
@@ -235,7 +235,7 @@ export function AddIncomeDrawer() {
                     {t("price")}
                   </Label>
                   <Input
-                    className="text-7xl font-bold tracking-tighter"
+                    className=" font-bold tracking-tighter"
                     placeholder="0"
                     type="number"
                     min={0}
@@ -396,7 +396,7 @@ export function AddSavingDrawer() {
                     {t("price")}
                   </Label>
                   <Input
-                    className="text-7xl font-bold tracking-tighter"
+                    className=" font-bold tracking-tighter"
                     placeholder="0"
                     type="number"
                     min={0}
