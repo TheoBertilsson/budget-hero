@@ -355,10 +355,10 @@ export function ExpenseBox() {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
   return (
-    <Card className="flex flex-col justify-between items-center h-full">
+    <Card className="flex flex-col justify-between items-center h-fit lg:h-full">
       {expenses.length > 0 ? (
-        <ScrollArea className=" h-[25rem] w-full">
-          <CardContent className="flex flex-col py-2 gap-4 overflow-auto w-full">
+        <ScrollArea className=" max-h-[25rem] w-full ">
+          <CardContent className="flex flex-col py-2 gap-4 overflow-auto w-full max-h-[25rem] ">
             {expenses.map((expense, i) => {
               return (
                 <div
